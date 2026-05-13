@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEVIATHAN | SUPREME CASINO ELITE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Syncopate:wght@700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <!-- ПОДКЛЮЧАЕМ FIREBASE ДЛЯ РЕАЛЬНОГО ВХОДА (GOOGLE, FB, APPLE) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    
+    <link rel="stylesheet" href="cos.css">
+</head>
+<body>
+    <!-- ПРЕЛОАДЕР -->
+    <div id="loader" class="preloader">
+        <div class="loader-circle"></div>
+        <div class="loader-logo">LEVIATHAN</div>
+    </div>
+
+    <div class="app-shell">
+        <!-- HEADER -->
+        <header class="main-header">
+            <div class="header-left">
+                <div class="burger-menu"><i class="fas fa-bars"></i></div>
+                <div class="logo-box" onclick="location.reload()">
+                    <span class="logo-text">LEVIATHAN</span>
+                    <span class="logo-suffix">CASINO</span>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Поиск любимой игры...">
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="user-wallets">
+                    <div class="wallet-real">
+                        <i class="fas fa-gem"></i>
+                        <span id="balance-amount">50 000</span>
+                        <small>LVC</small>
+                    </div>
+                </div>
+                
+                <button class="btn-deposit-top">ДЕПОЗИТ</button>
+
+                <!-- АВАТАРКА: УМНЫЙ КЛИК -->
+                <div class="user-profile-trigger" id="header-avatar-box" onclick="AuthSystem.openAuthOrProfile()">
+                    <i class="fas fa-user-circle" id="logged-out-icon" style="font-size: 2.2rem; color: rgba(255,255,255,0.6);"></i>
+                    <img id="logged-in-avatar" src="" style="display:none; width:100%; border-radius:50%;">
+                </div>
+            </div>
+        </header>
+
+        <div class="layout-body">
+            <!-- SIDEBAR LEFT -->
+            <aside class="side-nav">
+    <nav class="nav-links">
+    <a href="#" class="nav-item active"><i class="fas fa-home"></i> ХОЛЛ</a>
+    
+    <div class="nav-item-wrapper" id="cat-wrapper">
+        <a href="#" class="nav-item" id="categories-trigger">
+            <i class="fas fa-th-large"></i> КАТЕГОРИИ
+            <i class="fas fa-chevron-right arrow-icon"></i>
+        </a>
+        
+        <div class="side-dropdown" id="cat-menu">
+            <div class="dropdown-list">
+                <!-- ОСТРОВ 1 -->
+                
+
+                <!-- ОСТРОВ 2 -->
+                <div class="dropdown-group-box">
+                    <div class="dropdown-label">НАСТОЛЬНЫЕ И КОСТИ</div>
+                    <div class="dropdown-item sub">РУЛЕТКА (EU/US/BOULE)</div>
+                    <div class="dropdown-item sub">КРЭПС & СИК-БО</div>
+                    <div class="dropdown-item sub">ЧО-ХАН (JPN)</div>
+                </div>
+
+                <!-- ОСТРОВ 3 -->
+                <div class="dropdown-group-box">
+                    <div class="dropdown-label">КАРТОЧНЫЙ ЗАЛ</div>
+                    <div class="dropdown-item sub">БЛЭКДЖЕК (CLASSIC/21)</div>
+                    <div class="dropdown-item sub">БАККАРА (PUNTO/BANK)</div>
+                    <div class="dropdown-item sub">КАЗИНО ПОКЕР (OASIS/PAI GOW)</div>
+                </div>
+
+                <!-- ОСТРОВ 4 -->
+                <div class="dropdown-group-box">
+                    <div class="dropdown-label">АВТОМАТЫ И ТЕРМИНАЛЫ</div>
+                    <div class="dropdown-item sub">СЛОТЫ & MEGAWAYS</div>
+                    <div class="dropdown-item sub">ВИДЕОПОКЕР & ПАТИНКО</div>
+                </div>
+
+                <!-- ОСТРОВ 5 -->
+                <div class="dropdown-group-box">
+                    <div class="dropdown-label">ЛОТЕРЕИ & P2P</div>
+                    <div class="dropdown-item sub">КЕНО & БИНГО</div>
+                    <div class="dropdown-item sub">СКРЕТЧ-КАРТЫ</div>
+                    <div class="dropdown-item sub highlight-gold">МАХДЖОНГ & НАРДЫ (P2P)</div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- ВОТ ОН, СПАСИТЕЛЬНЫЙ ТЕГ! Он закрывает блок категорий -->
+
+   
+    
+    <!-- ВЫПАДАЮЩЕЕ ПРЕМИУМ-МЕНЮ -->
+    <div class="side-dropdown" id="cat-menu">
+    <div class="dropdown-list">
+       
+
+        <!-- ОСТРОВ 2: НАСТОЛКИ -->
+        <div class="dropdown-group-box">
+            <div class="dropdown-label">НАСТОЛЬНЫЕ И КОСТИ</div>
+            <div class="dropdown-item sub">РУЛЕТКА (EU/US/BOULE)</div>
+            <div class="dropdown-item sub">КРЭПС & СИК-БО</div>
+            <div class="dropdown-item sub">ЧО-ХАН (JPN)</div>
+        </div>
+
+        <!-- ОСТРОВ 3: КАРТЫ -->
+        <div class="dropdown-group-box">
+            <div class="dropdown-label">КАРТОЧНЫЙ ЗАЛ</div>
+            <div class="dropdown-item sub">БЛЭКДЖЕК (CLASSIC/21)</div>
+            <div class="dropdown-item sub">БАККАРА (PUNTO/BANK)</div>
+            <div class="dropdown-item sub">КАЗИНО ПОКЕР (OASIS/PAI GOW)</div>
+        </div>
+
+        <!-- ОСТРОВ 4: АВТОМАТЫ -->
+        <div class="dropdown-group-box">
+            <div class="dropdown-label">АВТОМАТЫ И ТЕРМИНАЛЫ</div>
+            <div class="dropdown-item sub">СЛОТЫ & MEGAWAYS</div>
+            <div class="dropdown-item sub">ВИДЕОПОКЕР & ПАТИНКО</div>
+        </div>
+
+        <!-- ОСТРОВ 5: ЛОТЕРЕИ И P2P -->
+        <div class="dropdown-group-box">
+            <div class="dropdown-label">ЛОТЕРЕИ & P2P</div>
+            <div class="dropdown-item sub">КЕНО & БИНГО</div>
+            <div class="dropdown-item sub">СКРЕТЧ-КАРТЫ</div>
+            <div class="dropdown-item sub highlight-gold">МАХДЖОНГ & НАРДЫ (P2P)</div>
+        </div>
+    </div>
+</div>
+        <a href="#" class="nav-item"><i class="fas fa-fire"></i> ТОП</a>
+        <a href="#" class="nav-item"><i class="fas fa-dice"></i> LIVE КАЗИНО</a>
+        <a href="#" class="nav-item"><i class="fas fa-plus-circle"></i> НОВИНКИ</a>
+        <a href="#" class="nav-item">
+            <i class="fas fa-trophy"></i> ТУРНИРЫ 
+            <span class="badge-pink">12</span>
+        </a>
+        <a href="#" class="nav-item"><i class="fas fa-star"></i> VIP CLUB</a>
+        <a href="#" class="nav-item"><i class="fas fa-percentage"></i> АКЦИИ</a>
+        <a href="#" class="nav-item"><i class="fas fa-wallet"></i> ПЛАТЕЖИ</a>
+    </nav>
+
+    <!-- VIP-СТАТУС ИЗ ТВОЕГО ЧЕРТЕЖА -->
+    <div class="vip-status-side">
+        <div class="vip-header">
+            <p>VIP-СТАТУС</p>
+            <small>Твой уровень: <span class="gold-glow">BRONZE</span></small>
+        </div>
+        <div class="vip-info">
+            <small>До SILVER: 1 250 LVC</small>
+            <div class="progress-bar">
+                <div class="fill" style="width: 25%"></div>
+            </div>
+            <div class="progress-percent">25%</div>
+        </div>
+        <button class="btn-mini-details">ПОДРОБНЕЕ</button>
+    </div>
+
+    <!-- НИЖНИЕ КНОПКИ УПРАВЛЕНИЯ -->
+    <div class="side-bottom-icons">
+        <button title="Поддержка"><i class="fas fa-question-circle"></i></button>
+        <button title="Подарки"><i class="fas fa-gift"></i></button>
+        <button title="Настройки"><i class="fas fa-cog"></i></button>
+    </div>
+</aside>
+
+            <!-- MAIN CONTENT -->
+            <main class="page-content">
+                <section class="hero-slider">
+    <div class="slide-info">
+        <p class="bonus-badge-top">БОНУС ПРИ РЕГИСТРАЦИИ: <span class="gold-glow">5000 LVC</span></p>
+        <h1>ДОБРО ПОЖАЛОВАТЬ В <span>LEVIATHAN</span></h1>
+        
+        <button class="btn-cta">ИГРАТЬ СЕЙЧАС</button>
+
+        <!-- ВСТАВЛЯЙ СЮДА -->
+        <p class="deposit-info">МГНОВЕННЫЙ ДЕПОЗИТ • <span class="gold-text">КЕШБЭК 15%</span> • БЕЗ КОМИССИЙ</p>
+    </div>
+</section>
+
+<div class="luxury-widgets">
+    <div class="widget-card">
+        <div class="widget-icon">🔥</div>
+        <div class="widget-info">
+            <span class="widget-title">ТОП ИГРЫ</span>
+            <small>Самые горячие</small>
+        </div>
+    </div>
+    <div class="widget-card">
+        <div class="widget-icon">🃏</div>
+        <div class="widget-info">
+            <span class="widget-title">LIVE КАЗИНО</span>
+            <small>Реальные дилеры</small>
+        </div>
+    </div>
+    <div class="widget-card">
+        <div class="widget-icon">🏆</div>
+        <div class="widget-info">
+            <span class="widget-title">ТУРНИРЫ</span>
+            <small>Призы и награды</small>
+        </div>
+    </div>
+    <div class="widget-card">
+        <div class="widget-icon">👑</div>
+        <div class="widget-info">
+            <span class="widget-title">VIP CLUB</span>
+            <small>Эксклюзив</small>
+        </div>
+    </div>
+</div>
+
+                <section class="categories-section" id="lobby-view">
+                    <div class="section-title">
+                        <h2 class="glitch-text" data-text="АКТУАЛЬНЫЕ АРЕНЫ">АКТУАЛЬНЫЕ АРЕНЫ</h2>
+                    </div>
+                    <div class="games-grid" id="categories-grid"></div>
+                </section>
+
+                <section id="games-view" style="display: none;">
+                    <div class="section-title">
+                         <h2 id="category-title" class="glitch-text" data-text="ЗАГРУЗКА...">ЗАГРУЗКА...</h2>
+                         <button onclick="LeviatEngine.backToLobby()" class="btn-deposit-top">НАЗАД В ХОЛЛ</button>
+                    </div>
+                    <div class="games-grid" id="main-games-grid"></div>
+                </section>
+            </main>
+
+            <!-- AI SIDEBAR -->
+            <aside class="ai-right-sidebar">
+                <div class="ai-brain-header">
+                    <div class="n<h4>LEVIATHAN AI</h4>
+                    eural-status"><div class="pulse-dot"></div>ONLINE</div>
+                </div>
+                <div class="ai-chat-interface">
+                    <div class="chat-viewport" id="ai-messages"></div>
+                    <div class="ai-input-box">
+                        <textarea id="ai-input" placeholder="Запрос системе..."></textarea>
+                        <button id="ai-send-btn"><i class="fas fa-bolt"></i></button>
+                    </div>
+                </div>
+                <div class="live-win-ticker">
+                    <h5>LIVE ВЫИГРЫШИ</h5>
+                    <div id="ticker-content"></div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ИГРЫ -->
+    <div id="game-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content slot-arena-bg">
+            <button onclick="closeGame()" class="close-game-btn"><i class="fas fa-times"></i></button>
+            <div class="slot-machine-container">
+                <div class="slot-header">
+                    <h2 id="current-game-title" class="glitch-text" data-text="LEVIATHAN PREMIER">LEVIATHAN PREMIER</h2>
+                    <div class="jackpot-counter">JACKPOT: <span id="jp-amount">1,250,500</span> LVC</div>
+                </div>
+                <div class="slot-viewport">
+                    <div class="reels-wrapper" id="reels-container"></div>
+                    <div class="win-line"></div>
+                </div>
+                <div class="slot-controls">
+                    <button class="btn-spin-main" id="spin-button" onclick="SlotMachine.spinReal()">КРУТИТЬ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ТВОЙ LIQUID GLASS (АККАУНТ И ЛОГИН) -->
+    <div id="auth-modal" class="glass-overlay" style="display: none;">
+        <!-- СЕКЦИЯ ЛОГИНА -->
+        <div id="auth-container" class="liquid-glass-box">
+            <button class="close-glass" onclick="AuthSystem.hideAuth()"><i class="fas fa-times"></i></button>
+            <h2 class="login-title">ENTRANCE</h2>
+            <div class="glass-input-wrapper">
+                <label>Email Access</label>
+                <div class="input-field"><i class=""></i><input type="email" id="reg-email" placeholder=""></div>
+            </div>
+            <div class="glass-input-wrapper">
+                <label>Security Key</label>
+                <div class="input-field"><i class="f"></i><input type="password" id="reg-pass" placeholder=""></div>
+            </div>
+            <button class="btn-signin-gray" onclick="AuthSystem.handleEmailAuth()">SIGN IN / REGISTER</button>
+            
+<div class="social-auth-grid" style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+    <!-- GOOGLE -->
+    <button class="social-btn google-special" onclick="AuthSystem.loginWith('google')">
+        <i class="fab fa-google"></i>
+    </button>
+
+    <!-- FACEBOOK -->
+    <button class="social-btn fb-special" onclick="AuthSystem.loginWith('facebook')">
+        <i class="fab fa-facebook-f"></i>
+    </button>
+
+    <!-- TELEGRAM -->
+    <button class="social-btn tg-special" onclick="AuthSystem.loginWithTelegram()">
+        <i class="fab fa-telegram-plane"></i>
+    </button>
+</div>
+</div>
+    </button>
+            </div>
+        </div>
+
+        <!-- СЕКЦИЯ ПРОФИЛЯ -->
+        <div id="profile-container" class="liquid-glass-box" style="display: none;">
+    <button class="close-glass" onclick="AuthSystem.hideAuth()"><i class="fas fa-times"></i></button>
+    
+    <div class="profile-header">
+        <div class="profile-avatar-wrapper">
+            <div class="profile-avatar" id="user-big-avatar">
+                <img src="https://via.placeholder.com/100" alt="Avatar">
+            </div>
+            <div class="status-badge">ONLINE</div>
+        </div>
+        <h2 id="user-display-name" class="glitch-text">USER_NAME</h2>
+        <div class="user-status">LEGENDARY MEMBER</div>
+    </div>
+    
+    <div class="profile-stats">
+        <div class="stat-item">
+            <small>BALANCE</small>
+            <div class="stat-value"><span id="prof-balance">50 000</span> LVC</div>
+        </div>
+        <div class="stat-item">
+            <small>WIN RATE</small>
+            <div class="stat-value" style="color: #00d4ff;">88%</div>
+        </div>
+    </div>
+
+    <div class="profile-actions">
+        <button class="btn-glass-action" onclick="location.reload()">СМЕНИТЬ АККАУНТ</button>
+        <button class="btn-logout" onclick="AuthSystem.logout()">ВЫЙТИ ИЗ СИСТЕМЫ</button>
+    </div>
+</div>
+    <!-- СКРИПТЫ -->
+    <script src="spin.js"></script>
+</body>
+</html>
