@@ -184,3 +184,57 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+// --- ЖЕСТКИЙ ПЕРЕХВАТ КАБИНЕТА ВИТО (ЗАМЕНА) ---
+(function() {
+    const navLinks = document.querySelectorAll('.nav-links a');
+    const profileBtn = navLinks[1]; // Убедись, что Профиль — второй в списке!
+
+    if (profileBtn) {
+        // Ставим обработчик на фазу погружения (true), чтобы быть быстрее Firebase
+        profileBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopImmediatePropagation(); // Глушим Firebase на корню
+
+            const pPage = document.getElementById('profile-screen');
+            const appShell = document.querySelector('.app-shell');
+
+            if (pPage && appShell) {
+                appShell.style.display = 'none';
+                pPage.style.display = 'block';
+                
+                // Обновляем баланс и статус из глобальных переменных
+                const bDisp = document.getElementById('user-balance-display');
+                const sDisp = document.getElementById('user-status');
+                
+                if (bDisp) bDisp.textContent = balance.toLocaleString();
+                if (sDisp) {
+                    sDisp.textContent = (balance > 100000) ? "VIP ELITE (БОСС)" : "START игрок (HUSTLER)";
+                    sDisp.style.color = (balance > 100000) ? "#ffd700" : "#c0c0c0";
+                }
+            }
+            console.log('Вито, мы пробили защиту Firebase!');
+        }, true);
+    }
+
+    // Кнопка НАЗАД (её Firebase не трогает, ставим просто так)
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'back-to-slots') {
+            const pPage = document.getElementById('profile-screen');
+            const appShell = document.querySelector('.app-shell');
+            if (pPage && appShell) {
+                pPage.style.display = 'none';
+                appShell.style.display = 'flex';
+            }
+        }
+    });
+
+    // Кнопка ВЫХОД
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'logout-btn') {
+            if (confirm('Вито, реально выходим?')) {
+                window.location.reload();
+            }
+        }
+    });
+})();
