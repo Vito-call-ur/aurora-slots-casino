@@ -57,6 +57,22 @@
             </div>
         </header>
 
+        <!-- ЭКРАН ПРОФИЛЯ ВИТО -->
+<div id="profile-screen" style="display: none; background: rgba(0,0,0,0.9); color: white; padding: 40px; min-height: 100vh; font-family: 'Montserrat', sans-serif;">
+    <h2 style="color: #ff00ff; text-transform: uppercase;">Личный кабинет Вито</h2>
+    
+    <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <p style="font-size: 1.2rem;">Баланс: <span id="user-balance-display" style="color: #00ff00; font-weight: bold;">0</span> BTC</p>
+        <p style="font-size: 1.2rem;">Статус: <span id="user-status" style="font-weight: bold;">Проверяется...</span></p>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 15px; max-width: 300px;">
+        <button id="check-activity" style="padding: 15px; background: #333; color: white; border: 1px solid #555; cursor: pointer; border-radius: 5px;">МОЯ АКТИВНОСТЬ</button>
+        <button id="back-to-slots" style="padding: 15px; background: #444; color: white; border: 1px solid #666; cursor: pointer; border-radius: 5px;">НАЗАД К ИГРАМ</button>
+        <button id="logout-btn" style="padding: 15px; background: #aa0000; color: white; border: none; cursor: pointer; border-radius: 5px; margin-top: 20px;">ВЫЙТИ ИЗ АККАУНТА</button>
+    </div>
+</div>
+
         <div class="layout-body">
             <!-- SIDEBAR LEFT -->
             <aside class="side-nav">
