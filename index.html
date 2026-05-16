@@ -390,6 +390,28 @@
                     <div style="font-size:8px; font-weight:900; color:#fff;">M-PESA AFR</div>
                 </div>
 
+                <!-- ДИНАМИЧЕСКИЕ ПОЛЯ ОПЛАТЫ (ВСТАВЛЯТЬ СРАЗУ ПОСЛЕ PAYMENT-GRID) -->
+            <div id="card-fields" style="display:none; margin: 20px 0;">
+                <div style="margin-bottom: 10px;">
+                    <input type="text" id="card-number" placeholder="CARD NUMBER" 
+                        style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.1); border-radius: 12px; padding: 15px; color: #fff; text-align: center; font-family: 'Space Grotesk'; outline: none;">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="card-expiry" placeholder="MM/YY" 
+                        style="width: 50%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.1); border-radius: 12px; padding: 15px; color: #fff; text-align: center; font-family: 'Space Grotesk'; outline: none;">
+                    <input type="password" id="card-cvv" placeholder="CVV" maxlength="3"
+                        style="width: 50%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.1); border-radius: 12px; padding: 15px; color: #fff; text-align: center; font-family: 'Space Grotesk'; outline: none;">
+                </div>
+            </div>
+
+            <div id="crypto-fields" style="display:none; margin: 20px 0;">
+                <div style="background: rgba(0,255,0,0.05); border: 1px solid rgba(0,255,0,0.1); border-radius: 12px; padding: 15px;">
+                    <input type="text" id="wallet-address" readonly value="LVC_SHADOW_GEN_X99" 
+                        style="width: 100%; background: none; border: none; color: #00ff00; text-align: center; font-size: 0.7rem; font-family: 'Space Grotesk'; outline: none;">
+                </div>
+                <small style="color: #444; font-size: 8px; margin-top: 8px; display: block; letter-spacing: 1px; text-align: center;">CLICK TO COPY ANONYMOUS ADDR</small>
+            </div>
+
                 <!-- CRYPTO GEARS -->
                 <div class="pay-card" onclick="selectPayMethod('mir')" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;">
                     <i class="fas fa-globe" style="font-size:1.3rem; color:#0e9f6e; margin-bottom:8px;"></i>
@@ -408,6 +430,34 @@
                     <div style="font-size:8px; font-weight:900; color:#fff;">MONERO</div>
                 </div>
             </div>
+
+            <!-- ВОТ СЮДА ВСТАВЛЯЙ ЭТОТ КУСОК (ОТСЮДА) -->
+            <div id="card-fields" style="display:none; margin: 20px 0;">
+                <div style="margin-bottom: 10px;">
+                    <input type="text" id="card-number" placeholder="CARD NUMBER" 
+                        style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.1); border-radius: 12px; padding: 15px; color: #fff; text-align: center; font-family: 'Space Grotesk'; outline: none;">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="card-expiry" placeholder="MM/YY" 
+                        style="width: 50%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.1); border-radius: 12px; padding: 15px; color: #fff; text-align: center; font-family: 'Space Grotesk'; outline: none;">
+                    <input type="password" id="card-cvv" placeholder="CVV" maxlength="3"
+                        style="width: 50%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.1); border-radius: 12px; padding: 15px; color: #fff; text-align: center; font-family: 'Space Grotesk'; outline: none;">
+                </div>
+            </div>
+
+            <div id="crypto-fields" style="display:none; margin: 20px 0;">
+                <div style="background: rgba(0,255,0,0.05); border: 1px solid rgba(0,255,0,0.1); border-radius: 12px; padding: 15px;">
+                    <input type="text" id="wallet-address" readonly value="LVC_SHADOW_GEN_X99" 
+                        style="width: 100%; background: none; border: none; color: #00ff00; text-align: center; font-size: 0.7rem; font-family: 'Space Grotesk'; outline: none;">
+                </div>
+            </div>
+            <!-- (ДОСЮДА) -->
+
+            <!-- ДАЛЬШЕ ИДЕТ ТВОЙ ВВОД СУММЫ (ЭТО УЖЕ ЕСТЬ) -->
+            <div style="margin: 25px 0; position: relative; z-index: 2;">
+                <div style="font-size: 9px; color: rgba(255,215,0,0.6); letter-spacing: 3px; font-weight: 900; margin-bottom: 15px; text-transform: uppercase;">
+                    TRANSACTION VOLUME (LVC)
+                </div>
 
             <!-- КОМПАКТНЫЙ ВВОД СУММЫ (БЕЗ ПРЫЩЕЙ) -->
             <div style="margin: 25px 0; position: relative; z-index: 2;">
