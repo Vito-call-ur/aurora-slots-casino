@@ -1,6 +1,6 @@
-// ==========================================
-// 1. КОНФИГУРАЦИЯ FIREBASE
-// ==========================================
+/* === LEVIATHAN CORE ENGINE: GLOBAL ELITE === */
+
+// 1. CONFIGURATION (Твой Firebase)
 const firebaseConfig = {
   apiKey: "AIzaSyBUjjFWdxBZNpTTtCpJVVf3_up0jtdEK58",
   authDomain: "leviathan-21118.firebaseapp.com",
@@ -12,229 +12,475 @@ const firebaseConfig = {
 };
 
 // Инициализация
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-// ==========================================
-// 2. ДВИЖОК КАЗИНО
-// ==========================================
-const LeviatEngine = {
-    balance: 50000,
-    init: function() {
-        console.log("LEVIATHAN: Системы онлайн");
-        this.updateBalanceUI();
-    },
-    updateBalanceUI: function() {
-        const balEl = document.getElementById('balance-amount');
-        const profBalEl = document.getElementById('prof-balance');
-        if (balEl) balEl.innerText = this.balance.toLocaleString();
-        if (profBalEl) profBalEl.innerText = this.balance.toLocaleString();
-    }
-};
+// 2. GLOBAL STATE
+let balance = parseInt(localStorage.getItem('balance')) || 50000;
+let currentJackpot = 1250500;
 
-// ==========================================
-// 3. СИСТЕМА АВТОРИЗАЦИИ И ПРОФИЛЯ
-// ==========================================
-const AuthSystem = {
+// 3. UI SYNC (Обновление баланса везде)
+function updateBalanceUI() {
+    const balTop = document.getElementById('balance-amount');
+    const balProf = document.getElementById('prof-balance');
+    const formatted = balance.toLocaleString();
+    
+    if (balTop) balTop.innerText = formatted;
+    if (balProf) balProf.innerText = formatted;
+    
+    localStorage.setItem('balance', balance);
+}
+
+// 4. AUTH & PROFILE SYSTEM
+window.AuthSystem = {
     currentUser: null,
-    isProcessing: false,
 
-    openAuthorOrProfile: function() {
-        const modal = document.getElementById('profile-modal');
-        const authMod = document.getElementById('auth-modal');
-        
-        // Если залогинены — открываем профиль, если нет — окно входа
-        if (this.currentUser) {
-            if (modal) {
-                modal.style.display = 'flex';
-                modal.classList.add('active');
-                this.syncProfile(); 
+    // ГЛАВНЫЙ ТРИГГЕР (Клик на аву)
+    openAuthOrProfile: function() {
+        const modal = document.getElementById('auth-modal');
+        const authView = document.getElementById('auth-container');
+        const profView = document.getElementById('profile-container');
+
+        if (modal) {
+            modal.style.display = 'flex';
+            if (this.currentUser) {
+                // Юзер в системе -> ПОКАЗЫВАЕМ КАБИНЕТ
+                authView.style.display = 'none';
+                profView.style.display = 'block';
+                this.syncProfile();
+            } else {
+                // Гость -> ПОКАЗЫВАЕМ ВХОД
+                authView.style.display = 'block';
+                profView.style.display = 'none';
             }
-        } else {
-            if (authMod) authMod.style.display = 'flex';
         }
+    },
+
+    // СИНХРОНИЗАЦИЯ ДАННЫХ ВНУТРИ КАБИНЕТА
+    syncProfile: function() {
+        if (!this.currentUser) return;
+
+        const nameDisplay = document.getElementById('user-display-name');
+        const bigAvatar = document.getElementById('user-big-avatar');
+        const vipStatus = document.getElementById('user-vip-status');
+
+        if (nameDisplay) nameDisplay.innerText = this.currentUser.displayName || "LEVIATHAN_BOSS";
+        if (bigAvatar && this.currentUser.photoURL) bigAvatar.src = this.currentUser.photoURL;
+
+        // ПРОВЕРКА VIP СТАТУСА (СТРОГО!)
+        if (vipStatus) {
+            if (balance >= 500000) {
+                vipStatus.innerText = "MEMBERSHIP: GOLDEN ELITE";
+                vipStatus.style.color = "#ffd700";
+            } else if (balance >= 100000) {
+                vipStatus.innerText = "MEMBERSHIP: SILVER PARTNER";
+                vipStatus.style.color = "#c0c0c0";
+            } else {
+                vipStatus.innerText = "MEMBERSHIP: START HUSTLER";
+                vipStatus.style.color = "#ffffff";
+            }
+        }
+        updateBalanceUI();
     },
 
     hideAuth: function() {
-        const pModal = document.getElementById('profile-modal');
-        const aModal = document.getElementById('auth-modal');
-        if (pModal) { pModal.style.display = 'none'; pModal.classList.remove('active'); }
-        if (aModal) aModal.style.display = 'none';
+        document.getElementById('auth-modal').style.display = 'none';
     },
 
-    loginWithGoogle: function() {
-        if (this.isProcessing) return;
-        this.isProcessing = true;
-
-        auth.signInWithPopup(googleProvider).then((result) => {
-            this.currentUser = result.user;
-            this.syncProfile();
-            this.hideAuth();
-            alert("Вход выполнен: " + this.currentUser.displayName);
-            LeviatEngine.updateBalanceUI();
-            this.isProcessing = false;
-        }).catch((err) => { 
-            this.isProcessing = false;
-            if (err.code !== 'auth/cancelled-popup-request') {
-                alert("Ошибка Гугла: " + err.message);
-            }
-            console.error(err);
-        });
+    loginWith: function(provider) {
+        if (provider === 'google') {
+            auth.signInWithPopup(googleProvider).then((res) => {
+                this.currentUser = res.user;
+                this.hideAuth();
+                location.reload(); // Перезагружаем для чистого рендера
+            }).catch(err => alert("Connection error: " + err.message));
+        }
     },
 
-    // --- НОВАЯ ФУНКЦИЯ ВЫХОДА ---
     logout: function() {
-        auth.signOut().then(() => {
-            this.currentUser = null;
-            alert("Вы вышли из системы");
-            location.reload(); // Перезагрузка страницы
-        });
-    },
-
-    loginWithTelegram: function() {
-        alert("Вход через Telegram временно в разработке (нужен бот)");
-    },
-
-    syncProfile: function() {
-        if (!this.currentUser) return;
-        
-        // 1. Имя
-        const nameEls = document.querySelectorAll('#user-display-name, .profile-name');
-        nameEls.forEach(el => el.innerText = this.currentUser.displayName);
-        
-        // 2. Аватарка
-        const avatarImg = document.getElementById('logged-in-avatar');
-        const icon = document.getElementById('logged-out-icon');
-        if (avatarImg && this.currentUser.photoURL) {
-            avatarImg.src = this.currentUser.photoURL;
-            avatarImg.style.display = 'block';
-            if (icon) icon.style.display = 'none';
-        }
-
-        // 3. СОСТОЯНИЕ (VIP статус)
-        const vipEl = document.getElementById('user-vip-status');
-        if (vipEl) {
-            const isVip = LeviatEngine.balance >= 100000; 
-            vipEl.innerText = isVip ? "VIP LEVEL" : "PLAYER";
-            vipEl.style.color = isVip ? "#ffd700" : "#fff";
-        }
-
-        // 4. АКТИВНОСТЬ
-        const statusEl = document.getElementById('user-activity');
-        if (statusEl) {
-            statusEl.innerText = "ONLINE";
-            statusEl.style.color = "#00ff00";
+        if (confirm("TERMINATE CONNECTION WITH LEVIATHAN?")) {
+            auth.signOut().then(() => {
+                localStorage.clear();
+                location.reload();
+            });
         }
     }
 };
 
+// 5. КАТЕГОРИИ И НАВИГАЦИЯ ПО ИГРАМ
+window.LeviatEngine = {
+    // Список категорий (можно расширять)
+    categories: [
+        { id: 'slots', title: 'SLOTS & MEGAWAYS', icon: '🔥' },
+        { id: 'live', title: 'LIVE CASINO', icon: '🃏' },
+        { id: 'tables', title: 'TABLE GAMES', icon: '🎲' },
+        { id: 'vip', title: 'VIP EXCLUSIVE', icon: '👑' }
+    ],
 
-// Сделаем системы доступными глобально
-window.AuthSystem = AuthSystem;
-window.LeviatEngine = LeviatEngine;
+    init: function() {
+        this.renderCategories();
+        updateBalanceUI();
+    },
 
-// ==========================================
-// 4. ЗАПУСК И ОБРАБОТЧИКИ
-// ==========================================
+    renderCategories: function() {
+        const grid = document.getElementById('categories-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        this.categories.forEach(cat => {
+            const card = document.createElement('div');
+            card.className = 'game-card category-card'; // Твой стиль из css
+            card.innerHTML = `
+                <div class="game-img-box" style="background: rgba(255,215,0,0.05); height: 150px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                    ${cat.icon}
+                </div>
+                <div class="game-info">
+                    <h4>${cat.title}</h4>
+                    <button class="btn-play-small" onclick="LeviatEngine.openCategory('${cat.id}')">ENTER ARENA</button>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    },
+
+    openCategory: function(id) {
+        const lobby = document.getElementById('lobby-view');
+        const gamesView = document.getElementById('games-view');
+        const title = document.getElementById('category-title');
+
+        if (lobby && gamesView) {
+            lobby.style.display = 'none';
+            gamesView.style.display = 'block';
+            title.innerText = id.toUpperCase();
+            this.renderGames(id);
+        }
+    },
+
+    backToLobby: function() {
+        document.getElementById('games-view').style.display = 'none';
+        document.getElementById('lobby-view').style.display = 'block';
+    },
+
+    renderGames: function(catId) {
+        const grid = document.getElementById('main-games-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        
+        // Тут будет цикл загрузки твоих игр из базы
+        for(let i=1; i<=8; i++) {
+            const game = document.createElement('div');
+            game.className = 'game-card';
+            game.innerHTML = `
+                <div class="game-img-box">
+                    <img src="https://via.placeholder.com/200x120?text=GAME+${i}" alt="Game">
+                </div>
+                <div class="game-info">
+                    <h4>PREMIER SLOT ${i}</h4>
+                    <button class="btn-play-small" onclick="SlotMachine.open('${catId}_game_${i}')">PLAY</button>
+                </div>
+            `;
+            grid.appendChild(game);
+        }
+    }
+};
+
+// 6. SLOT MACHINE CORE LOGIC
+window.SlotMachine = {
+    isSpinning: false,
+    symbols: ['💎', '👑', '🍒', '777', '🍋', '🔔', '🍀', '💰'],
+
+    open: function(gameId) {
+        const modal = document.getElementById('game-modal');
+        const title = document.getElementById('current-game-title');
+        if (modal) {
+            modal.style.display = 'flex';
+            title.innerText = gameId.toUpperCase().replace('_', ' ');
+            this.initReels();
+        }
+    },
+
+    initReels: function() {
+        const container = document.getElementById('reels-container');
+        if (!container) return;
+        container.innerHTML = '';
+        // Создаем 3 барабана
+        for (let i = 0; i < 3; i++) {
+            const reel = document.createElement('div');
+            reel.className = 'reel';
+            reel.id = `reel-${i}`;
+            reel.innerHTML = `<div class="symbol">${this.symbols[Math.floor(Math.random() * this.symbols.length)]}</div>`;
+            container.appendChild(reel);
+        }
+    },
+
+    spinReal: function() {
+        if (this.isSpinning || balance < 500) {
+            if (balance < 500) alert("LOW LIQUIDITY! NEED DEPOSIT.");
+            return;
+        }
+
+        this.isSpinning = true;
+        balance -= 500; // Ставка
+        updateBalanceUI();
+
+        const reels = [
+            document.getElementById('reel-0'),
+            document.getElementById('reel-1'),
+            document.getElementById('reel-2')
+        ];
+
+        const results = [];
+
+        reels.forEach((reel, index) => {
+            reel.classList.add('spinning');
+            setTimeout(() => {
+                const finalSymbol = this.symbols[Math.floor(Math.random() * this.symbols.length)];
+                reel.innerHTML = `<div class="symbol">${finalSymbol}</div>`;
+                reel.classList.remove('spinning');
+                results.push(finalSymbol);
+
+                if (results.length === 3) {
+                    this.checkWin(results);
+                }
+            }, 500 + (index * 300)); // Задержка для эффекта
+        });
+    },
+
+    checkWin: function(res) {
+        this.isSpinning = false;
+        // Логика победы: если 3 в ряд
+        if (res[0] === res[1] && res[1] === res[2]) {
+            let winAmount = 5000;
+            if (res[0] === '777') winAmount = 50000;
+            if (res[0] === '💎') winAmount = 25000;
+            
+            balance += winAmount;
+            alert(`EXTREME WIN! +${winAmount} LVC`);
+            updateBalanceUI();
+        }
+    }
+};
+
+// Функция закрытия игры (в глобальную область)
+window.closeGame = function() {
+    document.getElementById('game-modal').style.display = 'none';
+};
+
+// 7. SYSTEM BOOT (ЗАПУСК ВСЕХ СИСТЕМ)
 document.addEventListener('DOMContentLoaded', () => {
+    // Запускаем движок лобби
     LeviatEngine.init();
 
-    // Лоадер
+    // Прячем прелоадер (Твой фикс зависания!)
     const loader = document.getElementById('loader');
     if (loader) {
         setTimeout(() => {
             loader.style.opacity = '0';
-            setTimeout(() => { loader.style.display = 'none'; }, 500);
-        }, 1000);
+            setTimeout(() => {
+                loader.style.display = 'none';
+            }, 500);
+        }, 1500); // Даем 1.5 секунды насладиться твоей ебабельной заставкой
     }
 
-    // Кнопка профиля/входа в шапке
-    const avatarBtn = document.getElementById('header-avatar-box');
-    if (avatarBtn) {
-        avatarBtn.onclick = (e) => {
+    // Слушатель категорий (чтобы не тупили)
+    const catTrigger = document.getElementById('categories-trigger');
+    const catMenu = document.getElementById('cat-menu');
+    if (catTrigger && catMenu) {
+        catTrigger.onclick = (e) => {
             e.preventDefault();
-            AuthSystem.openAuthorOrProfile();
+            e.stopPropagation();
+            catMenu.style.display = (catMenu.style.display === 'block') ? 'none' : 'block';
         };
     }
 
-    // Обработчик кликов (Универсальный)
-    document.addEventListener('click', (e) => {
-        const target = e.target.closest('div, button, a');
-        if (!target) return;
-
-        // Кнопка закрытия профиля
-        if (target.classList.contains('close-profile')) {
+    // Закрытие всего при клике мимо
+    window.onclick = (e) => {
+        if (catMenu && !catTrigger.contains(e.target)) {
+            catMenu.style.display = 'none';
+        }
+        const authModal = document.getElementById('auth-modal');
+        if (e.target === authModal) {
             AuthSystem.hideAuth();
         }
-
-        // Кнопка Google
-        if (target.innerHTML.toLowerCase().includes('google') || target.innerText.includes('Google')) {
-            AuthSystem.loginWithGoogle();
-        }
-
-        // Меню категорий
-        const catTrigger = document.getElementById('categories-trigger');
-        const catMenu = document.getElementById('cat-menu');
-        if (target === catTrigger) {
-            e.preventDefault();
-            catMenu.style.display = (catMenu.style.display === 'block') ? 'none' : 'block';
-        }
-    });
+    };
 });
 
-// --- ЖЕСТКИЙ ПЕРЕХВАТ КАБИНЕТА ВИТО (ЗАМЕНА) ---
-(function() {
-    const navLinks = document.querySelectorAll('.nav-links a');
-    const profileBtn = navLinks[1]; // Убедись, что Профиль — второй в списке!
+// 8. AI INTERFACE (LEVIATHAN AI)
+const aiInput = document.getElementById('ai-input');
+const aiSendBtn = document.getElementById('ai-send-btn');
+const aiMessages = document.getElementById('ai-messages');
 
-    if (profileBtn) {
-        // Ставим обработчик на фазу погружения (true), чтобы быть быстрее Firebase
-        profileBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopImmediatePropagation(); // Глушим Firebase на корню
+if (aiSendBtn) {
+    aiSendBtn.onclick = () => {
+        const text = aiInput.value.trim();
+        if (!text) return;
+        
+        // Твое сообщение
+        const userMsg = document.createElement('div');
+        userMsg.style.cssText = 'color: #ffd700; margin-bottom: 10px; font-size: 0.8rem;';
+        userMsg.innerHTML = `<strong>YOU:</strong> ${text}`;
+        aiMessages.appendChild(userMsg);
+        
+        aiInput.value = '';
+        
+        // Ответ ИИ (пока заглушка, потом прикрутим настоящий разум)
+        setTimeout(() => {
+            const aiMsg = document.createElement('div');
+            aiMsg.style.cssText = 'color: #fff; margin-bottom: 15px; font-size: 0.8rem; opacity: 0.8;';
+            aiMsg.innerHTML = `<strong>AI:</strong> Processing your request... Betting on red is not a strategy, but I like your style.`;
+            aiMessages.appendChild(aiMsg);
+            aiMessages.scrollTop = aiMessages.scrollHeight;
+        }, 1000);
+    };
+}
 
-            const pPage = document.getElementById('profile-screen');
-            const appShell = document.querySelector('.app-shell');
+// Следим за состоянием Firebase
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        AuthSystem.currentUser = user;
+        AuthSystem.syncProfile();
+        
+        // Ставим аву в хедер (ФИНАЛЬНЫЙ ФИКС ГЕЙ-НЕОНА)
+        const headAva = document.getElementById('logged-in-avatar');
+        const logoutIc = document.getElementById('logged-out-icon');
+        if (headAva && user.photoURL) {
+            headAva.src = user.photoURL;
+            headAva.style.display = 'block';
+            if (logoutIc) logoutIc.style.display = 'none';
+        }
+    }
+});
 
-            if (pPage && appShell) {
-                appShell.style.display = 'none';
-                pPage.style.display = 'block';
-                
-                // Обновляем баланс и статус из глобальных переменных
-                const bDisp = document.getElementById('user-balance-display');
-                const sDisp = document.getElementById('user-status');
-                
-                if (bDisp) bDisp.textContent = balance.toLocaleString();
-                if (sDisp) {
-                    sDisp.textContent = (balance > 100000) ? "VIP ELITE (БОСС)" : "START игрок (HUSTLER)";
-                    sDisp.style.color = (balance > 100000) ? "#ffd700" : "#c0c0c0";
-                }
-            }
-            console.log('Вито, мы пробили защиту Firebase!');
-        }, true);
+console.log("LEVIATHAN ENGINE: ALL SYSTEMS NOMINAL. MONTE CARLO IS WAITING.");
+
+/* === GLOBAL CASHIER LOGIC === */
+const mainDepBtn = document.getElementById('deposit-btn-main');
+if (mainDepBtn) { mainDepBtn.onclick = () => { document.getElementById('deposit-modal').style.display = 'flex'; }; }
+
+function selectPayMethod(method) {
+    const cards = document.querySelectorAll('.pay-card');
+    cards.forEach(c => { c.style.borderColor = '#333'; c.style.background = 'rgba(255,255,255,0.02)'; });
+    const active = event.currentTarget;
+    let col = (method === 'onion') ? '#00ff00' : (method === 'tg-wallet' ? '#0088cc' : '#ffd700');
+    active.style.borderColor = col; active.style.background = `${col}11`;
+    const aiM = document.getElementById('ai-messages');
+    if (aiM) {
+        const d = document.createElement('div'); d.style.cssText = `color:${col}; font-size:0.8rem; margin-bottom:10px; border-left:2px solid ${col}; padding-left:10px;`;
+        d.innerHTML = `<strong>AI:</strong> GATEWAY ${method.toUpperCase()} SYNCED.`;
+        aiM.appendChild(d); aiM.scrollTop = aiM.scrollHeight;
+    }
+}
+
+function processDeposit() {
+    const amt = parseInt(document.getElementById('deposit-amount').value);
+    if (!amt || amt <= 0) return;
+    const b = event.target; b.innerText = "AUTHORIZING...";
+    setTimeout(() => {
+        balance += amt; updateBalanceUI();
+        b.innerText = "SUCCESSFUL"; b.style.background = "#00ff00";
+        setTimeout(() => {
+            document.getElementById('deposit-modal').style.display = 'none';
+            b.innerText = "Authorize Transaction"; b.style.background = "linear-gradient(135deg, #ffd700 0%, #b8860b 100%)";
+        }, 1000);
+    }, 1500);
+}
+
+/* === OPEN MODAL === */
+const cashBtn = document.getElementById('deposit-btn-main');
+if (cashBtn) cashBtn.onclick = () => document.getElementById('deposit-modal').style.display = 'flex';
+
+/* === SELECT METHOD (Glow Effect) === */
+function selectPayMethod(method) {
+    console.log(`Financial Protocol [${method.toUpperCase()}] selected.`);
+    // Тут в будущем можно добавить более сложную селекцию
+}
+
+function selectPayMethod(method) {
+    console.log("Selected method:", method);
+    const cardFields = document.getElementById('card-fields');
+    const cryptoFields = document.getElementById('crypto-fields');
+
+    // Прячем всё
+    cardFields.style.display = 'none';
+    cryptoFields.style.display = 'none';
+
+    // Показываем нужное
+    if (['visa', 'unionpay', 'mir', 'sepa'].includes(method)) {
+        cardFields.style.display = 'block';
+    } else if (['onion', 'btc', 'ton', 'xmr'].includes(method)) {
+        cryptoFields.style.display = 'block';
+    }
+}
+
+// ОСНОВНОЙ ПРОЦЕССИНГ ПЛАТЕЖА
+function processDeposit() {
+    const amount = document.getElementById('deposit-amount').value;
+    const btn = document.getElementById('confirm-deposit-btn');
+    const aiViewport = document.getElementById('ai-messages');
+
+    if (!amount || amount <= 0) {
+        alert("Enter transaction volume, Boss!");
+        return;
     }
 
-    // Кнопка НАЗАД (её Firebase не трогает, ставим просто так)
-    document.addEventListener('click', function(e) {
-        if (e.target && e.target.id === 'back-to-slots') {
-            const pPage = document.getElementById('profile-screen');
-            const appShell = document.querySelector('.app-shell');
-            if (pPage && appShell) {
-                pPage.style.display = 'none';
-                appShell.style.display = 'flex';
-            }
-        }
-    });
+    // Имитация работы банковского шлюза
+    btn.innerText = "CONNECTING TO SECURE GATEWAY...";
+    btn.style.opacity = "0.5";
+    btn.disabled = true;
 
-    // Кнопка ВЫХОД
-    document.addEventListener('click', function(e) {
-        if (e.target && e.target.id === 'logout-btn') {
-            if (confirm('Вито, реально выходим?')) {
-                window.location.reload();
-            }
-        }
-    });
-})();
+    // Сообщение от ИИ
+    if (aiViewport) {
+        const msg = document.createElement('div');
+        msg.style.color = "#ffd700";
+        msg.style.fontSize = "0.8rem";
+        msg.style.marginBottom = "10px";
+        msg.innerHTML = `<strong>LEVIATHAN AI:</strong> Initializing ${currentMethod.toUpperCase()} bridge. Laundering... I mean, processing ${amount} LVC.`;
+        aiViewport.appendChild(msg);
+    }
+
+    // Задержка "процессинга"
+    setTimeout(() => {
+        btn.innerText = "AUTHORIZING...";
+        
+        setTimeout(() => {
+            // ФИНАЛ: ВЫДАЕМ УСПЕХ
+            btn.innerText = "TRANSACTION SUCCESSFUL";
+            btn.style.background = "linear-gradient(135deg, #00ff00 0%, #008800 100%)";
+            
+            // Начисляем бабки (настоящая магия цифр)
+            const currentBal = parseInt(document.getElementById('balance-amount').innerText.replace(/\s/g, ''));
+            const newBal = currentBal + parseInt(amount);
+            document.getElementById('balance-amount').innerText = newBal.toLocaleString();
+            document.getElementById('prof-balance').innerText = newBal.toLocaleString();
+
+            alert(`Boss, ${amount} LVC added to your shadow account!`);
+            
+            // Сбрасываем всё через 2 сек
+            setTimeout(() => {
+                document.getElementById('deposit-modal').style.display = 'none';
+                btn.innerText = "Authorize Transaction";
+                btn.style.background = "linear-gradient(135deg, #ffd700 0%, #b8860b 100%)";
+                btn.disabled = false;
+                btn.style.opacity = "1";
+            }, 2000);
+            
+        }, 2000);
+    }, 1500);
+}
+
+function selectMajorMethod(type) {
+    const cardEl = document.getElementById('card-fields-dynamic');
+    const cryptoEl = document.getElementById('crypto-fields-dynamic');
+    
+    // Сбрасываем всё
+    cardEl.style.display = 'none';
+    cryptoEl.style.display = 'none';
+    
+    // Подсвечиваем выбор
+    if (type === 'card') {
+        cardEl.style.display = 'block';
+    } else {
+        cryptoEl.style.display = 'block';
+    }
+}
