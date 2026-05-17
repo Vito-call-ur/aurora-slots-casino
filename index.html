@@ -353,152 +353,55 @@
         </div>
     </div>
 
-    <!-- GLOBAL CASHIER MODAL: THE UNDERWORLD GATE -->
-    <div id="deposit-modal" class="glass-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:250000; align-items:center; justify-content:center; backdrop-filter: blur(40px);">
-        <div class="liquid-glass-box" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 215, 0, 0.3); border-radius:40px; padding:45px; text-align:center; width: 100%; max-width: 680px; position: relative; box-shadow: 0 40px 100px rgba(0,0,0,0.8);">
-            <div style="position:absolute; top:-50%; left:-50%; width:200%; height:200%; background: radial-gradient(circle, rgba(255,215,0,0.05) 0%, transparent 70%); pointer-events:none;"></div>
-            <button onclick="document.getElementById('deposit-modal').style.display='none'" style="position:absolute; top:25px; right:25px; background:none; border:none; color:#ffd700; cursor:pointer; font-size:2rem; opacity:0.6;"><i class="fas fa-times-circle"></i></button>
+        <div class="liquid-glass-box" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 40px; padding: 45px; text-align: center; width: 100%; max-width: 600px; position: relative;">
+            
+            <button onclick="document.getElementById('deposit-modal').style.display='none'" style="position:absolute; top:25px; right:25px; background:none; border:none; color:#ffd700; cursor:pointer; font-size:1.5rem; z-index:100;"><i class="fas fa-times-circle"></i></button>
+
             <h2 style="color:#ffd700; letter-spacing:12px; margin-bottom:10px; font-weight:900; font-family:'Syncopate';">CASHIER</h2>
             <p style="color:rgba(255,255,255,0.4); font-size:9px; text-transform:uppercase; margin-bottom:40px; letter-spacing:4px;">Global Financial Gateway [UNRESTRICTED]</p>
-            
-            <div class="payment-grid" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:40px; position:relative; z-index:2;">
-                <!-- NEON METHODS -->
-                <div class="pay-card" onclick="selectPayMethod('onion')" style="background:rgba(0,255,0,0.05); padding:22px; border-radius:18px; border:2px solid #00ff00; cursor:pointer; grid-column: span 2; box-shadow: 0 10px 30px rgba(0,255,0,0.15);">
-                    <i class="fas fa-mask" style="font-size:1.6rem; color:#00ff00; margin-bottom:10px; filter: drop-shadow(0 0 10px #00ff00);"></i>
-                    <div style="font-size:12px; font-weight:900; color:#00ff00; letter-spacing:2px;">ONION PAY</div>
-                </div>
-                <div class="pay-card" onclick="selectPayMethod('tg-wallet')" style="background:rgba(0,136,204,0.05); padding:22px; border-radius:18px; border:2px solid #0088cc; cursor:pointer; grid-column: span 2; box-shadow: 0 10px 30px rgba(0,136,204,0.15);">
-                    <i class="fab fa-telegram-plane" style="font-size:1.6rem; color:#0088cc; margin-bottom:10px; filter: drop-shadow(0 0 10px #0088cc);"></i>
-                    <div style="font-size:12px; font-weight:900; color:#0088cc; letter-spacing:2px;">TG WALLET</div>
-                </div>
 
-                <!-- WORLDWIDE CHANNELS -->
-                <div class="pay-card" onclick="selectPayMethod('unionpay')" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;">
-                    <i class="fas fa-credit-card" style="font-size:1.3rem; color:#fff; margin-bottom:8px;"></i>
-                    <div style="font-size:8px; font-weight:900; color:#fff;">UNIONPAY</div>
+            <!-- ГЛАВНЫЙ ВЫБОР -->
+            <div id="payment-selection-main" style="display: flex; gap: 20px; margin-bottom: 30px;">
+                <div class="pay-card" onclick="selectMajorMethod('card')" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 30px; cursor: pointer; text-align: center; transition: 0.3s;">
+                    <i class="fas fa-credit-card" style="font-size: 2.5rem; color: #fff; margin-bottom: 15px;"></i>
+                    <div style="font-size: 11px; font-weight: 900; color: #fff; letter-spacing: 2px;">BANK CARDS</div>
                 </div>
-                <div class="pay-card" onclick="selectPayMethod('visa')" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;">
-                    <i class="fab fa-cc-visa" style="font-size:1.3rem; color:#fff; margin-bottom:8px;"></i>
-                    <div style="font-size:8px; font-weight:900; color:#fff;">VISA / MC</div>
-                </div>
-                <div class="pay-card" onclick="selectPayMethod('sepa')" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;">
-                    <i class="fas fa-university" style="font-size:1.3rem; color:#fff; margin-bottom:8px;"></i>
-                    <div style="font-size:8px; font-weight:900; color:#fff;">EURO SEPA</div>
-                </div>
-                <div class="pay-card" onclick="selectPayMethod('mpesa')" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;">
-                    <i class="fas fa-mobile-alt" style="font-size:1.3rem; color:#fff; margin-bottom:8px;"></i>
-                    <div style="font-size:8px; font-weight:900; color:#fff;">M-PESA AFR</div>
-                </div>
-
-                <!-- ДИНАМИЧЕСКИЕ ПОЛЯ ОПЛАТЫ (ВСТАВЛЯТЬ СРАЗУ ПОСЛЕ PAYMENT-GRID) -->
-            <div id="card-fields" style="display:none; margin: 20px 0;">
-                <div style="margin-bottom: 10px;">
-                    <input type="text" id="card-number" placeholder="CARD NUMBER" 
-                        style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.1); border-radius: 12px; padding: 15px; color: #fff; text-align: center; font-family: 'Space Grotesk'; outline: none;">
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="card-expiry" placeholder="MM/YY" 
-                        style="width: 50%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.1); border-radius: 12px; padding: 15px; color: #fff; text-align: center; font-family: 'Space Grotesk'; outline: none;">
-                    <input type="password" id="card-cvv" placeholder="CVV" maxlength="3"
-                        style="width: 50%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.1); border-radius: 12px; padding: 15px; color: #fff; text-align: center; font-family: 'Space Grotesk'; outline: none;">
+                <div class="pay-card" onclick="selectMajorMethod('crypto')" style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 30px; cursor: pointer; text-align: center; transition: 0.3s;">
+                    <i class="fab fa-bitcoin" style="font-size: 2.5rem; color: #f7931a; margin-bottom: 15px;"></i>
+                    <div style="font-size: 11px; font-weight: 900; color: #fff; letter-spacing: 2px;">CRYPTOCURRENCY</div>
                 </div>
             </div>
 
-            <div id="crypto-fields" style="display:none; margin: 20px 0;">
-                <div style="background: rgba(0,255,0,0.05); border: 1px solid rgba(0,255,0,0.1); border-radius: 12px; padding: 15px;">
-                    <input type="text" id="wallet-address" readonly value="LVC_SHADOW_GEN_X99" 
-                        style="width: 100%; background: none; border: none; color: #00ff00; text-align: center; font-size: 0.7rem; font-family: 'Space Grotesk'; outline: none;">
+            <!-- ИНТЕРФЕЙС КАРТЫ -->
+            <div id="card-interface" style="display:none; animation: fadeIn 0.4s;">
+                <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.1); border-radius: 25px; padding: 35px; margin-bottom: 25px;">
+                    <input type="text" id="card-num-main" placeholder="XXXX XXXX XXXX XXXX" maxlength="19" style="width: 100%; background: none; border: none; border-bottom: 2px solid rgba(255,215,0,0.2); color: #fff; font-size: 1.5rem; text-align: center; margin-bottom: 35px; outline: none; font-family: 'Space Grotesk';">
+                    
+                    <div style="display: flex; justify-content: space-between; gap: 20px;">
+                        <input type="text" id="card-exp-main" placeholder="MM/YY" maxlength="5" style="width: 45%; background: none; border: none; border-bottom: 2px solid rgba(255,215,0,0.2); color: #fff; text-align: center; outline: none; font-size: 1.1rem;">
+                        <input type="password" id="card-cvv-main" placeholder="CVV" maxlength="3" style="width: 45%; background: none; border: none; border-bottom: 2px solid rgba(255,215,0,0.2); color: #fff; text-align: center; outline: none; font-size: 1.1rem;">
+                    </div>
                 </div>
-                <small style="color: #444; font-size: 8px; margin-top: 8px; display: block; letter-spacing: 1px; text-align: center;">CLICK TO COPY ANONYMOUS ADDR</small>
+
+                <!-- ЛОГОТИПЫ ПОД КАРТОЙ -->
+                <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; opacity: 0.7;">
+                    <i class="fab fa-cc-visa" style="font-size: 1.5rem; color: #fff;"></i>
+                    <i class="fab fa-cc-mastercard" style="font-size: 1.5rem; color: #fff;"></i>
+                    <i class="fab fa-cc-diners-club" style="font-size: 1.5rem; color: #fff;"></i>
+                    <span style="font-family: 'Space Grotesk'; font-size: 8px; font-weight: 900; align-self: center; letter-spacing: 1px; color: #ffd700;">UNIONPAY • MIR • SEPA • MPESA</span>
+                </div>
+
+                <!-- СУММА -->
+                <div style="margin-bottom: 30px;">
+                    <small style="color:rgba(255,215,0,0.5); font-size:9px; font-weight:900; letter-spacing:3px; display:block; margin-bottom:10px;">AMOUNT (LVC)</small>
+                    <input type="number" id="deposit-amount-final" placeholder="1000" style="width: 60%; background: none; border: none; border-bottom: 2px solid #ffd700; color: #fff; text-align: center; font-size: 2rem; outline: none; font-family: 'Space Grotesk'; font-weight: 900;">
+                </div>
+
+                <button onclick="processFinalDeposit()" id="confirm-deposit-btn" style="width: 100%; padding: 22px; background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%); border: none; border-radius: 18px; color: #000; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 3px;">AUTHORIZE TRANSACTION</button>
+                <button onclick="backToMethods()" style="background: none; border: none; color: #444; font-size: 9px; margin-top: 20px; cursor: pointer; letter-spacing: 1px;">BACK TO PAYMENT METHODS</button>
             </div>
-
-                <!-- CRYPTO GEARS -->
-                <div class="pay-card" onclick="selectPayMethod('mir')" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;">
-                    <i class="fas fa-globe" style="font-size:1.3rem; color:#0e9f6e; margin-bottom:8px;"></i>
-                    <div style="font-size:8px; font-weight:900; color:#fff;">MIR NET</div>
-                </div>
-                <div class="pay-card" onclick="selectPayMethod('btc')" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;">
-                    <i class="fab fa-bitcoin" style="font-size:1.3rem; color:#f7931a; margin-bottom:8px;"></i>
-                    <div style="font-size:8px; font-weight:900; color:#fff;">BITCOIN</div>
-                </div>
-                <div class="pay-card" onclick="selectPayMethod('ton')" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;">
-                    <i class="fas fa-gem" style="font-size:1.3rem; color:#0088cc; margin-bottom:8px;"></i>
-                    <div style="font-size:8px; font-weight:900; color:#fff;">USDT/TON</div>
-                </div>
-                <div class="pay-card" onclick="selectPayMethod('xmr')" style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; border:1px solid rgba(255,255,255,0.1); cursor:pointer;">
-                    <i class="fab fa-monero" style="font-size:1.3rem; color:#ff6600; margin-bottom:8px;"></i>
-                    <div style="font-size:8px; font-weight:900; color:#fff;">MONERO</div>
-                </div>
-            </div>
-
-            <!-- ВОТ СЮДА ВСТАВЛЯЙ ЭТОТ КУСОК (ОТСЮДА) -->
-            <div id="card-fields" style="display:none; margin: 20px 0;">
-                <div style="margin-bottom: 10px;">
-                    <input type="text" id="card-number" placeholder="CARD NUMBER" 
-                        style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.1); border-radius: 12px; padding: 15px; color: #fff; text-align: center; font-family: 'Space Grotesk'; outline: none;">
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="card-expiry" placeholder="MM/YY" 
-                        style="width: 50%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.1); border-radius: 12px; padding: 15px; color: #fff; text-align: center; font-family: 'Space Grotesk'; outline: none;">
-                    <input type="password" id="card-cvv" placeholder="CVV" maxlength="3"
-                        style="width: 50%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,215,0,0.1); border-radius: 12px; padding: 15px; color: #fff; text-align: center; font-family: 'Space Grotesk'; outline: none;">
-                </div>
-            </div>
-
-            <div id="crypto-fields" style="display:none; margin: 20px 0;">
-                <div style="background: rgba(0,255,0,0.05); border: 1px solid rgba(0,255,0,0.1); border-radius: 12px; padding: 15px;">
-                    <input type="text" id="wallet-address" readonly value="LVC_SHADOW_GEN_X99" 
-                        style="width: 100%; background: none; border: none; color: #00ff00; text-align: center; font-size: 0.7rem; font-family: 'Space Grotesk'; outline: none;">
-                </div>
-            </div>
-            <!-- (ДОСЮДА) -->
-
-            <!-- ДАЛЬШЕ ИДЕТ ТВОЙ ВВОД СУММЫ (ЭТО УЖЕ ЕСТЬ) -->
-            <div style="margin: 25px 0; position: relative; z-index: 2;">
-                <div style="font-size: 9px; color: rgba(255,215,0,0.6); letter-spacing: 3px; font-weight: 900; margin-bottom: 15px; text-transform: uppercase;">
-                    TRANSACTION VOLUME (LVC)
-                </div>
-
-            <!-- КОМПАКТНЫЙ ВВОД СУММЫ (БЕЗ ПРЫЩЕЙ) -->
-            <div style="margin: 25px 0; position: relative; z-index: 2;">
-                <div style="font-size: 9px; color: rgba(255,215,0,0.6); letter-spacing: 3px; font-weight: 900; margin-bottom: 15px; text-transform: uppercase;">
-                    TRANSACTION VOLUME (LVC)
-                </div>
-                <input type="number" id="deposit-amount" placeholder="0.00" 
-                    style="width: 80%; background: none; border: none; border-bottom: 2px solid rgba(255,215,0,0.3); color: #fff; text-align: center; font-size: 2.2rem; outline: none; font-family: 'Space Grotesk'; font-weight: 900; transition: 0.3s; padding-bottom: 5px;"
-                    onfocus="this.style.borderBottomColor='#ffd700';"
-                    onblur="this.style.borderBottomColor='rgba(255,215,0,0.3)';">
-            </div>
-
-            <!-- ФИНАЛЬНАЯ КНОПКА -->
-            <button onclick="processDeposit()" id="confirm-deposit-btn" 
-                style="width: 100%; padding: 22px; background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%); border: none; border-radius: 18px; color: #000; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 3px; box-shadow: 0 15px 30px rgba(184, 134, 11, 0.3); transition: 0.3s;">
-                Authorize Transaction
-            </button>
-            
-            <!-- LANGUAGE SELECTOR: STEALTH CONTROL -->
-            <div style="text-align:left; margin-bottom:25px;">
-                <label style="color:#555; font-size:10px; display:block; margin-bottom:12px; letter-spacing:2px; font-weight:900;">INTERFACE LANGUAGE</label>
-                <select id="lang-selector" onchange="LeviathanIntel.setLang(this.value)" style="width:100%; padding:15px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,215,0,0.2); border-radius:10px; color:#fff; cursor:pointer; outline:none; font-family:'Space Grotesk';">
-                    <option value="en">ENGLISH (GLOBAL ACCESS)</option>
-                    <option value="ru">RUSSIAN (CIS AREA)</option>
-                    <option value="de">DEUTSCH (EU SECTOR)</option>
-                    <option value="zh">CHINESE (ASIA BRIDGE)</option>
-                </select>
-            </div>
-
-            <!-- STEALTH UI TOGGLE -->
-            <div style="text-align:left; margin-bottom:30px;">
-                <label style="color:#555; font-size:10px; display:block; margin-bottom:12px; letter-spacing:2px; font-weight:900;">SECURITY PREFERENCES</label>
-                <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.3); padding:15px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
-                    <span style="color:#ccc; font-size:11px; font-weight:700;">HIDE BALANCE IN PUBLIC</span>
-                    <input type="checkbox" style="accent-color:#ffd700; width:18px; height:18px; cursor:pointer;">
-                </div>
-            </div>
-
-            <p style="color:#333; font-size:8px; margin-top:20px; letter-spacing:1px; font-weight:900;">LEVIATHAN OS v1.0.4 | STABLE ENCRYPTION</p>
         </div>
-    </div>
+
 
     <!-- ENGINE CONNECT: THE CORE LOGIC -->
     <script src="spin.js"></script>
