@@ -123,27 +123,40 @@ window.LeviatEngine = {
         updateBalanceUI();
     },
 
-    renderCategories: function() {
+        renderCategories: function() {
         const grid = document.getElementById('categories-grid');
         if (!grid) return;
         grid.innerHTML = '';
 
         this.categories.forEach(cat => {
             const card = document.createElement('div');
-            card.className = 'game-card category-card'; // Твой стиль из css
+            // Убедись, что тут НЕТ лишних классов с анимациями
+            card.className = "game-card category-card"; 
+            
+            card.onclick = () => {
+                // 1. Убираем класс у всех
+                document.querySelectorAll('.category-card').forEach(c => {
+                    c.classList.remove('selected');
+                });
+                // 2. Добавляем нажатой
+                card.classList.add('selected');
+                // 3. Переключаем контент
+                this.openCategory(cat.id);
+            };
+
             card.innerHTML = `
-                <div class="game-img-box" style="background: rgba(255,215,0,0.05); height: 150px; display: flex; align-items: center; justify-content: center; font-size: 3rem;">
+                <div class="game-img-box" style="background:rgba(255,255,255,0.05); height:150px; display:flex; align-items:center; justify-content:center; font-size:3rem;">
                     ${cat.icon}
                 </div>
                 <div class="game-info">
                     <h4>${cat.title}</h4>
-                    <button class="btn-play-small" onclick="LeviatEngine.openCategory('${cat.id}')">ENTER ARENA</button>
+                    <button class="btn-play-small" style="pointer-events: none;">ENTER ARENA</button>
                 </div>
             `;
             grid.appendChild(card);
         });
     },
-
+    
     openCategory: function(id) {
         const lobby = document.getElementById('lobby-view');
         const gamesView = document.getElementById('games-view');
