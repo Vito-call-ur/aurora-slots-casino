@@ -572,18 +572,7 @@ body {
 }
 
 /* ЦВЕТОВЫЕ АКЦЕНТЫ ПРИ НАВЕДЕНИИ */
-/* ЭФФЕКТ ПРИ НАВЕДЕНИИ (HOVER) */
-.category-card:hover {
-    transform: scale(1.05) translateY(-5px);
-    border-color: var(--accent-red);
-    box-shadow: 0 0 30px rgba(255, 0, 76, 0.2);
-}
 
-.category-card:hover i {
-    color: var(--accent-red);
-    transform: scale(1.2) rotate(-5deg);
-    filter: drop-shadow(0 0 20px var(--accent-red));
-}
 
 /* ЭФФЕКТ ПРИ КЛИКЕ (ФИКСАЦИЯ - ACTIVE STATE) */
 /* Этот класс будет добавляться через JS */
@@ -598,9 +587,19 @@ body {
     filter: drop-shadow(0 0 25px var(--accent-red));
 }
 
-.category-card.selected .card-title {
-    color: #fff;
-    text-shadow: 0 0 10px var(--accent-red);
+/* КЛАСС ФИКСАЦИИ (SELECTED STATE) - СТРОКА 590 */
+.category-card.selected {
+    border-color: #ff4b4b !important;
+    background: rgba(255, 75, 75, 0.1) !important;
+    transform: scale(1.02) !important; /* Почти не двигается, только цвет */
+    box-shadow: 0 0 20px rgba(255, 75, 75, 0.3) !important;
+}
+
+.category-card.selected i, 
+.category-card.selected h4 {
+    color: #ff4b4b !important;
+    transform: none !important; /* НИКАКИХ ПРЫЖКОВ */
+    filter: drop-shadow(0 0 5px #ff4b4b) !important;
 }
 
 
@@ -1656,3 +1655,29 @@ body {
     top: 100%;
 }
 
+/* ЭФФЕКТ ДЛЯ КВАДРАТНЫХ КНОПОК СОЦСЕТЕЙ */
+.social-btn:hover {
+    background: rgba(255, 215, 0, 0.1) !important;
+    border-color: #ffd700 !important;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.1);
+}
+
+/* ПОДСВЕТКА КНОПОК СОЦСЕТЕЙ */
+.social-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.social-btn:hover {
+    background: rgba(255, 255, 255, 0.1) !important; /* Делаем чуть светлее */
+    border-color: #ffd700 !important; /* Золотая рамка при наведении */
+    color: #ffd700 !important; /* Иконка тоже станет золотой */
+    transform: translateY(-3px); /* Слегка приподнимаем */
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); /* Мягкое золотое свечение */
+}
+
+.social-btn:active {
+    transform: translateY(1px); /* Эффект физического нажатия */
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
