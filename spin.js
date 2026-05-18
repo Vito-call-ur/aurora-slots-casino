@@ -484,3 +484,118 @@ function selectMajorMethod(type) {
         cryptoEl.style.display = 'block';
     }
 }
+
+// ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ НА КАРТУ (ДЛЯ ВИТО)
+window.selectMajorMethod = function(type) {
+    console.log("Selecting method:", type); // Чтобы ты видел в консоли (F12), что нажатие прошло
+    if (type === 'card') {
+        const selectionScreen = document.getElementById('payment-selection-main');
+        const cardInterface = document.getElementById('card-interface');
+        
+        if (selectionScreen && cardInterface) {
+            selectionScreen.style.display = 'none';
+            cardInterface.style.display = 'block';
+        } else {
+            console.error("Бро, я не нашел ID блоков в HTML!");
+        }
+    }
+};
+
+// КНОПКА НАЗАД К ВЫБОРУ
+window.backToMethods = function() {
+    const selectionScreen = document.getElementById('payment-selection-main');
+    const cardInterface = document.getElementById('card-interface');
+    
+    if (selectionScreen && cardInterface) {
+        selectionScreen.style.display = 'flex';
+        cardInterface.style.display = 'none';
+    }
+};
+
+window.selectMajorMethod = function(type) {
+    const selection = document.getElementById('payment-selection-main');
+    const cardInt = document.getElementById('card-interface');
+    const cryptoInt = document.getElementById('crypto-interface');
+
+    selection.style.display = 'none';
+
+    if (type === 'card') {
+        cardInt.style.display = 'block';
+        cryptoInt.style.display = 'none';
+    } else if (type === 'crypto') {
+        cardInt.style.display = 'none';
+        cryptoInt.style.display = 'block';
+    }
+};
+
+// Добавим выбор кошелька
+window.selectCoin = function(coin) {
+    constaddr = document.getElementById('wallet-address');
+    const wallets = {
+        'BTC': '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+        'ETH': '0xde0B295669a9FD93d5F28D9Ec85E40f4cb697BAe',
+        'USDT': 'TXj9M6STPSTXvHSm5uxXJ5f9jSSTDXvHkx'
+    };
+    addr.innerText = wallets[coin];
+    // Можно еще рамки менять у выбранной кнопки, но это лоск
+    console.log("Coin changed to:", coin);
+};
+
+// И не забудь подправить backToMethods, чтобы скрывал и крипту тоже
+window.backToMethods = function() {
+    document.getElementById('payment-selection-main').style.display = 'flex';
+    document.getElementById('card-interface').style.display = 'none';
+    document.getElementById('crypto-interface').style.display = 'none';
+};
+
+window.smartClose = function() {
+    const selection = document.getElementById('payment-selection-main');
+    const cardInt = document.getElementById('card-interface');
+    const cryptoInt = document.getElementById('crypto-interface');
+    const modal = document.getElementById('deposit-modal');
+
+    // Если сейчас открыта карта или крипта — возвращаем к выбору
+    if ((cardInt && cardInt.style.display === 'block') || (cryptoInt && cryptoInt.style.display === 'block')) {
+        cardInt.style.display = 'none';
+        if(cryptoInt) cryptoInt.style.display = 'none';
+        selection.style.display = 'flex';
+        console.log("Юзер хотел сбежать, но мы вернули его к выбору методов!");
+    } 
+    // Если он уже на экране выбора — тогда закрываем нахер всё окно
+    else {
+        modal.style.display = 'none';
+        console.log("Касса закрыта.");
+    }
+};
+
+window.selectCoin = function(coin) {
+    const wallets = {
+        'BTC': 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+        'ETH': '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+        'USDT': 'TR7NHqjuSXPabT7395q66u26tnRHHgb8iL'
+    };
+
+    // Сбрасываем все кнопки
+    document.querySelectorAll('.coin-btn').forEach(btn => {
+        btn.style.borderColor = 'rgba(255,255,255,0.1)';
+        btn.style.background = 'rgba(255,255,255,0.05)';
+    });
+
+    // Подсвечиваем выбранную
+    const activeBtn = document.getElementById('coin-' + coin.toLowerCase());
+    activeBtn.style.borderColor = '#f7931a';
+    activeBtn.style.background = 'rgba(247, 147, 26, 0.1)';
+
+    // Обновляем инфу
+    document.getElementById('wallet-addr-display').innerText = wallets[coin];
+    document.getElementById('coin-label').innerText = coin;
+    
+    console.log("Crypto mode: " + coin);
+};
+
+window.copyWallet = function() {
+    const addr = document.getElementById('wallet-addr-display').innerText;
+    navigator.clipboard.writeText(addr);
+    alert("Address copied to clipboard!");
+};
+
