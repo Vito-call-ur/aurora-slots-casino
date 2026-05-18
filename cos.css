@@ -1604,3 +1604,51 @@ body {
     background: rgba(255, 0, 0, 0.2);
     box-shadow: 0 0 15px rgba(255, 0, 0, 0.2);
 }
+
+/* ЭФФЕКТЫ ДЛЯ КНОПОК КАССЫ */
+.pay-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Наводка на Карты */
+.pay-card:nth-child(1):hover {
+    background: rgba(255, 255, 255, 0.07) !important;
+    border-color: rgba(255, 215, 0, 0.5) !important;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.15);
+    transform: translateY(-5px);
+}
+
+/* Наводка на Крипту */
+.pay-card:nth-child(2):hover {
+    background: rgba(247, 147, 26, 0.05) !important;
+    border-color: rgba(247, 147, 26, 0.4) !important;
+    box-shadow: 0 0 30px rgba(247, 147, 26, 0.2);
+    transform: translateY(-5px);
+}
+
+/* Эффект активного нажатия */
+.pay-card:active {
+    transform: translateY(0) scale(0.95);
+    opacity: 0.8;
+}
+
+/* Блеск (Glare effect) при наведении */
+.pay-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.03), transparent);
+    transform: rotate(45deg);
+    transition: 0.5s;
+    pointer-events: none;
+}
+
+.pay-card:hover::after {
+    left: 100%;
+    top: 100%;
+}
