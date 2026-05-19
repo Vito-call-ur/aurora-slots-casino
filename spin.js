@@ -156,7 +156,7 @@ window.LeviatEngine = {
             grid.appendChild(card);
         });
     },
-    
+
     openCategory: function(id) {
         const lobby = document.getElementById('lobby-view');
         const gamesView = document.getElementById('games-view');
@@ -612,3 +612,24 @@ window.copyWallet = function() {
     alert("Address copied to clipboard!");
 };
 
+// ВОЗВРАЩАЕМ ВИТЮ НА БАЗУ
+window.openProfile = function() {
+    const modal = document.getElementById('profile-modal'); // Проверь ID в HTML!
+    if (modal) {
+        modal.style.display = 'flex';
+        console.log("Welcome back, Boss Vitya!");
+    } else {
+        console.error("Profile modal not found! Check ID in index.html");
+    }
+};
+
+window.closeProfile = function() {
+    const modal = document.getElementById('profile-modal');
+    if (modal) modal.style.display = 'none';
+};
+
+// Чтобы кнопка TERMINATE SESSION работала
+window.logout = function() {
+    alert("TERMINATING SESSION...");
+    location.reload();
+};
