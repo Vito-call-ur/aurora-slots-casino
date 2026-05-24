@@ -6,18 +6,185 @@
     <title>LEVIATHAN | SUPREME CASINO ELITE</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Syncopate:wght@700&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="cos.css">
+
+    <style>
+        /* AUTH MODAL: motion from center */
+        #auth-modal{
+            opacity:0;
+            visibility:hidden;
+            transition: opacity .25s ease, visibility .25s ease, backdrop-filter .4s ease;
+            backdrop-filter: blur(0px);
+            pointer-events:none;
+        }
+        #auth-modal.active{
+            opacity:1;
+            visibility:visible;
+            backdrop-filter: blur(26px);
+            pointer-events:auto;
+        }
+        .auth-pop{
+            transform-origin:center;
+            transform: translateY(0) scale(.65);
+            opacity:0;
+            filter: blur(6px);
+            transition: transform .55s cubic-bezier(.16,1,.3,1), opacity .45s ease, filter .55s ease;
+        }
+        #auth-modal.active .auth-pop{
+            transform: translateY(0) scale(1);
+            opacity:1;
+            filter: blur(0);
+        }
+        #auth-modal.closing .auth-pop{
+            transform: translateY(10px) scale(.85);
+            opacity:0;
+            filter: blur(8px);
+        }
+
+        /* luxury bits */
+        .gold-divider{
+            height:1px;
+            width: 72%;
+            margin: 10px auto 18px auto;
+            background: linear-gradient(90deg,
+                rgba(255,215,0,0) 0%,
+                rgba(255,215,0,0.55) 25%,
+                rgba(255,215,0,0.9) 50%,
+                rgba(255,215,0,0.55) 75%,
+                rgba(255,215,0,0) 100%);
+            box-shadow: 0 0 18px rgba(255,215,0,0.25);
+        }
+
+        .auth-glass-card{
+            width: 100%;
+            max-width: 440px;
+            padding: 34px 28px 26px 28px;
+            border-radius: 26px;
+            background: radial-gradient(circle at 20% 10%, rgba(255,215,0,0.10), rgba(255,255,255,0.02) 30%, rgba(0,0,0,0.2) 100%), rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,215,0,0.30);
+            box-shadow:
+                0 30px 90px rgba(0,0,0,0.45),
+                inset 0 0 0 1px rgba(255,215,0,0.12),
+                0 0 35px rgba(255,215,0,0.10);
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-glass-card:before{
+            content:"";
+            position:absolute;
+            inset:-2px;
+            background: linear-gradient(135deg, rgba(255,215,0,0.55), rgba(184,134,11,0.18), rgba(255,215,0,0.08));
+            opacity:.18;
+            pointer-events:none;
+        }
+        .auth-glass-card > *{ position:relative; z-index:1; }
+
+        .auth-title{
+            text-align:center;
+            font-family:'Syncopate';
+            letter-spacing: 6px;
+            font-weight: 900;
+            margin: 0 0 10px 0;
+            font-size: 26px;
+            color: #fff;
+        }
+        .auth-subtitle{
+            text-align:center;
+            color: rgba(255,255,255,0.55);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin: 0 0 22px 0;
+            font-weight: 900;
+        }
+
+        .auth-label{
+            display:block;
+            color: rgba(255,255,255,0.45);
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin: 0 0 8px 0;
+            font-weight: 900;
+        }
+        .auth-input{
+            width: 100%;
+            box-sizing: border-box;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,215,0,0.25);
+            border-radius: 14px;
+            padding: 14px 14px;
+            color: #fff;
+            outline: none;
+            font-family: 'Space Grotesk';
+            letter-spacing: 1px;
+            transition: border-color .2s ease, box-shadow .2s ease;
+        }
+        .auth-input:focus{
+            border-color: rgba(255,215,0,0.65);
+            box-shadow: 0 0 0 4px rgba(255,215,0,0.12);
+        }
+
+        .gold-btn-premium{
+            width: 100%;
+            margin-top: 10px;
+            border: none;
+            cursor:pointer;
+            padding: 15px 16px;
+            border-radius: 16px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #000;
+            background: linear-gradient(135deg, #ffd700 0%, #b8860b 60%, #ffcc00 100%);
+            box-shadow: 0 14px 30px rgba(184,134,11,0.25), inset 0 0 0 1px rgba(0,0,0,0.08);
+            transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+        }
+        .gold-btn-premium:hover{
+            transform: translateY(-1px);
+            filter: saturate(1.12);
+            box-shadow: 0 18px 40px rgba(184,134,11,0.32), inset 0 0 0 1px rgba(0,0,0,0.08);
+        }
+
+        .social-grid{
+            display:flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .social-btn{
+            flex:1;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap: 10px;
+            border-radius: 16px;
+            padding: 12px 10px;
+            cursor:pointer;
+            border: 1px solid rgba(255,215,0,0.22);
+            background: rgba(255,255,255,0.02);
+            color: #fff;
+            transition: transform .2s ease, border-color .2s ease, background .2s ease;
+            user-select:none;
+        }
+        .social-btn:hover{
+            transform: translateY(-1px);
+            border-color: rgba(255,215,0,0.6);
+            background: rgba(255,215,0,0.05);
+        }
+        .social-icon{
+            font-size: 1.2rem;
+        }
+        .social-text{
+            font-size: 12px;
+            letter-spacing: 1px;
+            font-weight: 900;
+        }
+    </style>
     
     <!-- FIREBASE CORE -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     
-    <link rel="stylesheet" href="cos.css">
-    <style>
-        /* Динамический эффект для Liquid Glass */
-        .glass-overlay { backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); transition: 0.5s; }
-        .liquid-glass-box { animation: glass-appear 0.6s ease-out; }
-        @keyframes glass-appear { from { transform: scale(0.9) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
-    </style>
 </head>
 <body>
     <!-- PRELOADER (GOLD EDITION) -->
@@ -44,24 +211,16 @@
                 </div>
             </div>
 
-            <div class="header-right">
-                <!-- WALLET SYSTEM: LIQUIDITY DISPLAY -->
-                <div class="user-wallets">
-                    <div class="wallet-real">
-                        <i class="fas fa-gem" style="color: #ffd700;"></i>
-                        <span id="balance-amount">50 000</span>
-                        <small>LVC</small>
-                    </div>
-                </div>
-                
-                <!-- DEPOSIT TRIGGER -->
-                <button class="btn-deposit-top" id="deposit-btn-main" style="background: #ffd700; color: #000; font-weight: 900; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; transition: 0.3s; box-shadow: 0 0 20px rgba(255,215,0,0.4); text-transform: uppercase; letter-spacing: 1px;">DEPOSIT</button>
+            <div class="header-right" id="header-right" style="display:flex; align-items:center; justify-content:flex-end; gap:15px;">
+                <div class="wallet-real">[Balance: 50,000 LVC]</div>
+<button class="btn-deposit-top" onclick="document.getElementById('deposit-modal').style.display='flex'" type="button">DEPOSIT</button>
+<button class="btn-profile-icon" onclick="openAuth()" type="button" aria-label="Profile" title="Profile" style="border:none; background: transparent; padding:0; display:flex; align-items:center; justify-content:center;">
+    <span id="profile-avatar-frame" style="display:none; width:34px; height:34px; border-radius:50%; padding:2px; background: linear-gradient(135deg, rgba(255,215,0,0.95), rgba(184,134,11,0.85), rgba(255,215,0,0.95)); box-shadow: 0 0 18px rgba(255,215,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.08);">
+        <img id="profile-avatar-img" alt="User avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; background: rgba(0,0,0,0.35);" />
+    </span>
 
-                <!-- SMART AVATAR: BOSS ACCESS -->
-                <div class="user-profile-trigger" id="header-avatar-box" onclick=onclick="openProfile()" style="width: 50px; height: 50px; position: relative; cursor: pointer; margin-left: 15px;">
-                    <i class="fas fa-user-circle" id="logged-out-icon" style="font-size: 2.5rem; color: rgba(255,255,255,0.4); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></i>
-                    <img id="logged-in-avatar" src="" style="display:none; width:100%; height:100%; border-radius:50%; object-fit: cover; border: 2px solid #ffd700; position: absolute; top: 0; left: 0; box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);">
-                </div>
+    <i id="profile-default-icon" class="fas fa-user" style="display:block;"></i>
+</button>
             </div>
         </header>
 
@@ -70,7 +229,6 @@
             <aside class="side-nav">
                 <nav class="nav-links">
                     <a href="#" class="nav-item active"><i class="fas fa-home"></i> HALL</a>
-                    
                     <div class="nav-item-wrapper" id="cat-wrapper">
                         <a href="#" class="nav-item" id="categories-trigger">
                             <i class="fas fa-th-large"></i> CATEGORIES
@@ -100,11 +258,10 @@
                                     <div class="dropdown-label">LOTTERY & P2P</div>
                                     <div class="dropdown-item sub">KENO & BINGO</div>
                                     <div class="dropdown-item sub">SCRATCH CARDS</div>
-                                    <div class="dropdown-item sub highlight-gold">MAHJONG & BACKGAMMON</div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
+                            </div> <!-- end dropdown-list -->
+                        </div> <!-- end side-dropdown (cat-menu) -->
+                    </div> <!-- end nav-item-wrapper (cat-wrapper) -->
 
                     <a href="#" class="nav-item"><i class="fas fa-fire"></i> TOP GAMES</a>
                     <a href="#" class="nav-item"><i class="fas fa-dice"></i> LIVE CASINO</a>
@@ -113,7 +270,7 @@
                         <i class="fas fa-trophy"></i> TOURNAMENTS 
                         <span class="badge-pink">12</span>
                     </a>
-                    <a href="#" class="nav-item"><i class="fas fa-star" style="color: #ffd700;"></i> VIP CLUB</a>
+                    <a href="#" class="nav-item">VIP CLUB</a>
                     <a href="#" class="nav-item"><i class="fas fa-percentage"></i> PROMO</a>
                     <a href="#" class="nav-item" onclick="document.getElementById('deposit-modal').style.display='flex'"><i class="fas fa-wallet"></i> PAYMENTS</a>
                 </nav>
@@ -302,53 +459,55 @@
         </div>
     </div>
 
-    <!-- LIQUID GLASS AUTH SYSTEM -->
-    <div id="auth-modal" class="glass-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:200000; align-items:center; justify-content:center; backdrop-filter: blur(25px);">
-        
-        <div id="auth-container" class="liquid-glass-box" style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 215, 0, 0.2); border-radius:35px; padding:50px; text-align:center; box-shadow: 0 40px 100px rgba(0,0,0,0.8); width: 100%; max-width: 450px; position: relative;">
-            <button onclick="AuthSystem.hideAuth()" style="position:absolute; top:25px; right:25px; background:none; border:none; color:#ffd700; font-size:1.5rem; cursor:pointer;"><i class="fas fa-times"></i></button>
-            <h2 style="letter-spacing:10px; color:#ffd700; margin-bottom:40px; font-weight:900; font-family:'Syncopate';">ENTRANCE</h2>
-            
-            <div style="margin-bottom:20px; text-align: left;">
-                <label style="color:#555; display:block; margin-bottom:10px; font-size:10px; letter-spacing:2px; font-weight: 900;">ENCRYPTED ID</label>
-                <input type="email" id="reg-email" placeholder="ACCESS_ID" style="width:100%; padding:18px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,215,0,0.1); border-radius:12px; color:#fff; font-family:'Space Grotesk'; outline:none; text-align: center;">
-            </div>
-            <div style="margin-bottom:40px; text-align: left;">
-                <label style="color:#555; display:block; margin-bottom:10px; font-size:10px; letter-spacing:2px; font-weight: 900;">SECURITY KEY</label>
-                <input type="password" id="reg-pass" placeholder="••••••••" style="width:100%; padding:18px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,215,0,0.1); border-radius:12px; color:#fff; font-family:'Space Grotesk'; outline:none; text-align: center;">
-            </div>
-            
-            <button onclick="AuthSystem.handleEmailAuth()" style="width:100%; padding:22px; border-radius:15px; background: linear-gradient(135deg, #ffd700, #b8860b); color:#000; border:none; font-weight:900; cursor:pointer; text-transform: uppercase; letter-spacing:3px;">ESTABLISH CONNECTION</button>
-            
-            <div style="display:flex; gap:20px; justify-content:center; margin-top:40px;">
-                <button onclick="AuthSystem.loginWith('google')" style="width:55px; height:55px; border-radius:50%; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); color:#fff; cursor:pointer; font-size: 1.2rem;"><i class="fab fa-google"></i></button>
-                <button onclick="AuthSystem.loginWithTelegram()" style="width:55px; height:55px; border-radius:50%; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); color:#fff; cursor:pointer; font-size: 1.2rem;"><i class="fab fa-telegram-plane"></i></button>
-            </div>
-        </div>
+    <div id="auth-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center;">
+        <div class="auth-pop auth-glass-card">
+            <!-- REGISTRATION (only) -->
+            <div id="auth-panel-signup">
+                <div class="auth-title">SIGN UP</div>
+                <div class="auth-subtitle">LIQUID GLASS REGISTRATION</div>
+                <div class="gold-divider"></div>
 
-        <!-- PROFILE SECTION: BOSS INTERFACE -->
-        <div id="profile-container" class="liquid-glass-box" style="display:none; position:relative; background: rgba(255, 255, 255, 0.02); border: 2px solid rgba(255, 215, 0, 0.4); border-radius:35px; padding:50px; text-align:center; min-width:400px; box-shadow: 0 40px 100px rgba(0,0,0,0.8);">
-            <button onclick="AuthSystem.hideAuth()" style="position:absolute; top:25px; right:25px; background:none; border:none; color:#ffd700; cursor:pointer; font-size:1.5rem;"><i class="fas fa-times"></i></button>
-            <div class="profile-header" style="margin-bottom:35px;">
-                <div style="width:130px; height:130px; margin:0 auto 20px; border:3px solid #ffd700; border-radius:50%; padding:5px; background:rgba(255,215,0,0.1); box-shadow: 0 0 30px rgba(255,215,0,0.3);">
-                    <img id="user-big-avatar" src="" alt="BOSS" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                <div style="margin-bottom:14px;">
+                    <label class="auth-label" for="auth-signup-username">USERNAME</label>
+                    <input id="auth-signup-username" class="auth-input" type="text" placeholder="Create username" autocomplete="username" />
                 </div>
-                <h2 id="user-display-name" style="color:#fff; font-size:2rem; letter-spacing:3px; margin:0; font-family:'Syncopate'; font-weight:900;">VITO_BOSS</h2>
-                <div id="user-vip-status" style="color:#ffd700; font-weight:900; font-size:11px; letter-spacing:4px; text-transform: uppercase; margin-top:10px;">RANK: ELITE_EVALUATOR</div>
-            </div>
-            <div style="display:flex; justify-content:space-between; padding:25px; background:rgba(255,255,255,0.03); border-radius:20px; margin-bottom:35px;">
-                <div class="stat-box">
-                    <small style="color:#555; display:block; font-size:9px; letter-spacing:2px; margin-bottom:5px;">LIQUIDITY</small>
-                    <span style="color:#ffd700; font-weight:900; font-size:1.6rem;"><span id="prof-balance">0</span> LVC</span>
+                <div style="margin-bottom:10px;">
+                    <label class="auth-label" for="auth-signup-password">PASSWORD</label>
+                    <input id="auth-signup-password" class="auth-input" type="password" placeholder="Create password" autocomplete="new-password" />
                 </div>
-                <div class="stat-box" style="border-left: 1px solid rgba(255,255,255,0.05); padding-left: 25px;">
-                    <small style="color:#555; display:block; font-size:9px; letter-spacing:2px; margin-bottom:5px;">WIN RATE</small>
-                    <span style="color:#00d4ff; font-weight:900; font-size:1.6rem;">88%</span>
+
+                <button class="gold-btn-premium" onclick="handleRegister()">CREATE ACCOUNT</button>
+
+                <div class="social-grid">
+                    <div class="social-btn" role="button" tabindex="0" onclick="AuthSystem.loginWith('google')" onkeydown="if(event.key==='Enter') AuthSystem.loginWith('google')">
+                        <i class="fab fa-google social-icon" aria-hidden="true"></i>
+                        <span class="social-text">Google</span>
+                    </div>
+
+                    <div class="social-btn" role="button" tabindex="0" onclick="handleSocialLogin('apple')" onkeydown="if(event.key==='Enter') handleSocialLogin('apple')">
+                        <i class="fab fa-apple social-icon" aria-hidden="true"></i>
+                        <span class="social-text">Apple</span>
+                    </div>
+
+                    <div class="social-btn" role="button" tabindex="0" onclick="startTelegramLogin()" onkeydown="if(event.key==='Enter') startTelegramLogin()">
+                        <i class="fab fa-telegram-plane social-icon" aria-hidden="true"></i>
+                        <span class="social-text">Telegram</span>
+                    </div>
+
+                    <div class="social-btn" role="button" tabindex="0" onclick="handleSocialLogin('facebook')" onkeydown="if(event.key==='Enter') handleSocialLogin('facebook')">
+                        <i class="fab fa-facebook-f social-icon" aria-hidden="true"></i>
+                        <span class="social-text">Facebook</span>
+                    </div>
                 </div>
-            </div>
-            <div style="display:flex; flex-direction:column; gap:15px;">
-                <button onclick="location.reload()" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,215,0,0.2); color:#fff; padding:18px; border-radius:12px; cursor:pointer; font-weight:700; text-transform:uppercase; letter-spacing:2px;">SYNCHRONIZE</button>
-                <button onclick="AuthSystem.logout()" style="background: linear-gradient(135deg, #aa0000, #660000); color:#fff; border:none; padding:20px; border-radius:12px; font-weight:900; cursor:pointer; text-transform:uppercase; letter-spacing:2px;">TERMINATE SESSION</button>
+
+                <div style="margin-top:14px; padding:14px 14px; border-radius:16px; border:1px solid rgba(255,215,0,0.25); background: radial-gradient(circle at 20% 0%, rgba(255,215,0,0.18), rgba(0,0,0,0) 55%), rgba(255,255,255,0.02); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);">
+                    <div style="color: rgba(255,255,255,0.78); font-size:12px; font-weight:900; letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; text-align:center;">
+                        M A T T E • A U R A • G O L D
+                    </div>
+                    <div style="color: rgba(255,255,255,0.50); font-size:12px; text-align:center;">
+                        Smooth liquid glass onboarding (demo UI)
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -437,37 +596,82 @@
                          <span style="color:#f7931a; font-weight:900; font-size:1rem;" id="coin-label">BTC</span>
                     </div>
                 </div>
+                
 
                 <button onclick="processCryptoDeposit()" style="width: 100%; padding: 22px; background: #f7931a; border: none; border-radius: 18px; color: #000; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;">Confirm Crypto Payment</button>
                 <button onclick="backToMethods()" style="background: none; border: none; color: rgba(255,255,255,0.2); font-size: 8px; margin-top: 15px; cursor: pointer;">← BACK TO SELECTION</button>
             </div> <!-- Закрыли crypto-interface -->
-        </div> <!-- Закрыли deposit-modal -->
+        </div> 
     <!-- ENGINE CONNECT: THE CORE LOGIC -->
     <script src="spin.js"></script>
 
-    <!-- FINAL UI SECURITY LAYER -->
+   <!-- Концовка твоего файла index.html -->
     <script>
-        // Глобальный обработчик кликов для закрытия окон мимо контента
-        window.onclick = function(event) {
-            const mods = [
-                {id: 'auth-modal', fn: () => AuthSystem.hideAuth()},
-                {id: 'deposit-modal', fn: () => document.getElementById('deposit-modal').style.display='none'},
-                {id: 'settings-modal', fn: () => document.getElementById('settings-modal').style.display='none'},
-                {id: 'game-modal', fn: () => closeGame()}
-            ];
-            mods.forEach(m => {
-                const el = document.getElementById(m.id);
-                if (event.target == el) m.fn();
-            });
-        }
-        
-        // Автоматическое скрытие прелоадера после инициализации
-        window.onload = () => {
-            setTimeout(() => {
-                document.getElementById('loader').style.opacity = '0';
-                setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
-            }, 1000);
+        // Функция для Босс-меню (профиль)
+        window.openProfile = function() {
+            const boss = document.getElementById('boss-overlay');
+            if (boss) boss.style.display = 'flex';
         };
+
+        window.closeAuth = function() {
+            const modal = document.getElementById('auth-modal');
+            if (!modal) return;
+
+            modal.classList.remove('active');
+            modal.classList.add('closing');
+
+            // force reflow to make animation start reliably
+            void modal.offsetWidth;
+
+            setTimeout(() => {
+                modal.classList.remove('closing');
+                modal.style.display = 'none';
+            }, 260);
+        };
+
+        // unified AUTH opener
+        function openAuth() {
+            const modal = document.getElementById('auth-modal');
+            if (!modal) return;
+
+            modal.style.display = 'flex';
+
+            // reset state + restart animations
+            modal.classList.remove('closing');
+            void modal.offsetWidth;
+            modal.classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const authModal = document.getElementById('auth-modal');
+            if (!authModal) return;
+
+            // Close on background click
+            authModal.addEventListener('click', function(e) {
+                if (e.target === authModal) {
+                    window.closeAuth();
+                }
+            });
+        });
+
+        // legacy alias: keep in case other code calls openAuthModal()
+        function openAuthModal() {
+            openAuth();
+        }
+
+        function handleSocialLogin(provider){
+            alert('Leviathan AI: Social login (в разработке): ' + provider);
+        }
+        function handleCreateAccount(e){
+            e && e.preventDefault && e.preventDefault();
+            alert('Leviathan AI: Create Account (в разработке).');
+        }
+
+        function handleRegister(){
+            alert('Leviathan AI: Register (в разработке).');
+        }
     </script>
+
 </body>
+
 </html>
