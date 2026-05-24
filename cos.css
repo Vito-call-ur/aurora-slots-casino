@@ -977,25 +977,7 @@ body {
     padding-right: 25px; /* Отступ от правого края казика */
 }
 
-/* Наша круглая аватарка */
-.user-profile-trigger {
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: 0.3s;
-}
-.user-profile-trigger:hover i {
-    color: var(--accent-blue) !important;
-}
 
-.user-profile-trigger img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
 
 /* Поправка баланса, чтобы не слипался */
 .user-wallets {
@@ -1068,19 +1050,7 @@ body {
     padding: 5px;
     background: rgba(0, 229, 255, 0.1);
 }
-.profile-avatar img { width: 100%; border-radius: 50%; }
-.user-status {
-    font-size: 0.7rem;
-    color: var(--gold);
-    letter-spacing: 3px;
-    margin-top: 5px;
-}
-.profile-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 30px;
-}
+
 .stat-item {
     background: rgba(255,255,255,0.05);
     padding: 15px;
@@ -1105,8 +1075,7 @@ body {
 /* Сама G с твоим фирменным окрасом */
 .social-btn.google-special i {
     /* Плавный градиент как на твоем фото */
-     background: linear-gradient(135deg, #ea4335 0%, #fbbc05 30%, #34a853 60%, #4285f4 100%
-     );
+     background: linear-gradient(135deg, #ea4335 0%, #fbbc05 30%, #34a853 60%, #4285f4 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-size: 2.2rem; /* Сделаем её побольше и поярче */
@@ -1555,11 +1524,7 @@ body {
     transform: translateX(5px); /* Легкий сдвиг при наведении */
 }
 
-.profile-avatar-wrapper {
-    position: relative;
-    margin: 0 auto 15px;
-    width: 100px;
-}
+
 
 .status-badge {
     position: absolute;
@@ -1574,12 +1539,7 @@ body {
     box-shadow: 0 0 10px #00ff00;
 }
 
-.profile-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 20px;
-}
+
 
 .btn-glass-action {
     background: rgba(255, 255, 255, 0.05);
@@ -1681,3 +1641,234 @@ body {
     transform: translateY(1px); /* Эффект физического нажатия */
     box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
 }
+
+/* КВАДРАТНЫЕ КНОПКИ АВТОРИЗАЦИИ */
+.social-auth-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+}
+.social-auth-grid .sq-btn {
+    background: #252525;
+    border: 1px solid #333;
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.social-auth-grid .sq-btn:hover {
+    border-color: #ffd700;
+    background: #333;
+}
+
+/* Если вдруг иконка не отображается, убедись что Font Awesome подключен в head */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+
+/* Элитное стекло и золото для профиля */
+.auth-glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 40px;
+    width: 350px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    text-align: center;
+    margin: auto;
+}
+
+.gold-btn-premium {
+    background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%);
+    color: black !important;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 900;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: 0.3s;
+    text-transform: uppercase;
+}
+
+.social-box { margin-top: 25px; display: flex; justify-content: center; gap: 25px; }
+.social-box i { font-size: 24px; color: white; cursor: pointer; transition: 0.3s; opacity: 0.6; }
+.social-box i:hover { opacity: 1; color: #ffd700; transform: scale(1.2); }
+
+.input-group {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    margin-bottom: 20px;
+    padding: 10px;
+}
+.input-group input { background: none; border: none; color: white; outline: none; width: 100%; }
+
+/* =========================
+   AUTH MODAL (SIGN IN)
+   ========================= */
+#auth-modal{
+    opacity:0;
+    visibility:hidden;
+    transition: opacity .25s ease, visibility .25s ease, backdrop-filter .4s ease;
+    backdrop-filter: blur(0px);
+    pointer-events:none;
+}
+#auth-modal.active{
+    opacity:1;
+    visibility:visible;
+    backdrop-filter: blur(26px);
+    pointer-events:auto;
+}
+
+.auth-pop{
+    transform-origin:center;
+    transform: translateY(0) scale(.65);
+    opacity:0;
+    filter: blur(6px);
+    transition: transform .55s cubic-bezier(.16,1,.3,1), opacity .45s ease, filter .55s ease;
+}
+#auth-modal.active .auth-pop{
+    transform: translateY(0) scale(1);
+    opacity:1;
+    filter: blur(0);
+}
+#auth-modal.closing .auth-pop{
+    transform: translateY(10px) scale(.85);
+    opacity:0;
+    filter: blur(8px);
+}
+
+.gold-divider{
+    height:1px;
+    width: 72%;
+    margin: 10px auto 18px auto;
+    background: linear-gradient(90deg, rgba(255,215,0,0) 0%, rgba(255,215,0,0.55) 25%, rgba(255,215,0,0.9) 50%, rgba(255,215,0,0.55) 75%, rgba(255,215,0,0) 100%);
+    box-shadow: 0 0 18px rgba(255,215,0,0.25);
+}
+
+.auth-title{
+    text-align:center;
+    font-family:'Syncopate';
+    letter-spacing: 6px;
+    font-weight: 900;
+    margin: 0 0 10px 0;
+    font-size: 26px;
+    color: #fff;
+}
+.auth-subtitle{
+    text-align:center;
+    color: rgba(255,255,255,0.55);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin: 0 0 22px 0;
+}
+
+.auth-input{
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,215,0,0.25);
+    border-radius: 14px;
+    padding: 14px 14px;
+    color: #fff;
+    outline: none;
+    font-family: 'Space Grotesk';
+    letter-spacing: 1px;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.auth-input:focus{
+    border-color: rgba(255,215,0,0.65);
+    box-shadow: 0 0 0 4px rgba(255,215,0,0.12);
+}
+
+.auth-label{
+    display:block;
+    color: rgba(255,255,255,0.45);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin: 0 0 8px 0;
+    font-weight: 900;
+}
+
+.gold-btn-premium{
+    width: 100%;
+    margin-top: 10px;
+    border: none;
+    cursor:pointer;
+    padding: 15px 16px;
+    border-radius: 16px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #000;
+    background: linear-gradient(135deg, #ffd700 0%, #b8860b 60%, #ffcc00 100%);
+    box-shadow: 0 14px 30px rgba(184,134,11,0.25), inset 0 0 0 1px rgba(0,0,0,0.08);
+    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+.gold-btn-premium:hover{
+    transform: translateY(-1px);
+    filter: saturate(1.12);
+    box-shadow: 0 18px 40px rgba(184,134,11,0.32), inset 0 0 0 1px rgba(0,0,0,0.08);
+}
+
+.social-grid{
+    display:flex;
+    gap: 8px;
+    margin-top: 16px;
+}
+.social-btn{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 8px;
+    border-radius: 16px;
+    padding: 6px 3px;
+    cursor:pointer;
+    border: 1px solid rgba(255,215,0,0.22);
+    background: rgba(255,255,255,0.02);
+    color: #fff;
+    transition: transform .2s ease, border-color .2s ease, background .2s ease;
+    user-select:none;
+}
+.social-btn:hover{
+    transform: translateY(-1px);
+    border-color: rgba(255,215,0,0.6);
+    background: rgba(255,215,0,0.05);
+}
+.social-icon{
+    font-size: 1.0rem; /* уменьшили общий размер иконки */
+    line-height: 1;
+}
+.social-text{
+    display: none; /* чтобы не было переполнения по ширине (Telegram/FB) */
+}
+
+/* Telegram glyph иногда визуально шире — принудительно ужмём */
+.social-btn .fa-telegram-plane{
+    font-size: 0.95rem;
+    line-height: 1;
+    transform: translateY(0.5px);
+}
+
+.auth-hint{
+    margin-top: 18px;
+    color: rgba(255,255,255,0.55);
+    font-size: 13px;
+    text-align:center;
+}
+.auth-hint a{
+    color:#ffd700;
+    text-decoration:none;
+    font-weight:900;
+}
+.auth-hint a:hover{ text-decoration:underline; }
