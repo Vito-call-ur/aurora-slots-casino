@@ -633,3 +633,14 @@ window.logout = function() {
     alert("TERMINATING SESSION...");
     location.reload();
 };
+
+// Функция для твоего золотого профиля
+window.openAuth = function() {
+    console.log("Leviathan: Система активирована, открываю профиль...");
+    const modal = document.getElementById('auth-modal');
+    if(modal) {
+        modal.style.display = 'flex';
+    } else {
+        alert("Босс, окно 'auth-modal' не найдено в HTML!");
+    }
+};
