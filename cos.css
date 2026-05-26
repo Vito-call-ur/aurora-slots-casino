@@ -1872,3 +1872,527 @@ body {
     font-weight:900;
 }
 .auth-hint a:hover{ text-decoration:underline; }
+
+/* =========================
+   LIQUID GOLD GLASS
+   Личный Кабинет (VIP)
+   ========================= */
+
+.liquid-gold-cabinet-wrap{
+    margin: 26px 0 10px;
+    animation: lgcWrapIn 0.65s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes lgcWrapIn{
+    0%{ opacity:0; transform: translateY(14px) scale(.98); filter: blur(10px); }
+    100%{ opacity:1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+.liquid-gold-cabinet{
+    position: relative;
+    border-radius: 26px;
+    border: 1px solid rgba(255,215,0,0.22);
+    background:
+        radial-gradient(circle at 20% 0%, rgba(255,215,0,0.18), transparent 55%),
+        radial-gradient(circle at 90% 20%, rgba(255,215,0,0.10), transparent 45%),
+        rgba(255,255,255,0.03);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow:
+        0 25px 70px rgba(0,0,0,0.65),
+        inset 0 0 0 1px rgba(255,255,255,0.03),
+        inset 0 0 35px rgba(255,215,0,0.07);
+    overflow: hidden;
+
+    /* Симметрия: 2 колонки (50/50) */
+    max-width: 980px;
+    margin: 0 auto;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 18px;
+}
+
+@media (max-width: 1100px){
+    .liquid-gold-cabinet{ grid-template-columns: 1fr; }
+}
+
+.lgc-sheen{
+    pointer-events:none;
+    position:absolute;
+    inset:-40% -60%;
+    background:
+        linear-gradient(115deg,
+            rgba(255,215,0,0) 0%,
+            rgba(255,215,0,0.20) 35%,
+            rgba(255,215,0,0.08) 50%,
+            rgba(255,215,0,0) 70%);
+    transform: translateX(-20%) rotate(12deg);
+    opacity: .85;
+    animation: lgcSheen 4.5s ease-in-out infinite;
+}
+@keyframes lgcSheen{
+    0%,100%{ transform: translateX(-18%) rotate(12deg); opacity: .55; }
+    50%{ transform: translateX(6%) rotate(12deg); opacity: .95; }
+}
+
+/* “Золото заливает экран” */
+.lgc-gold-fill{
+    pointer-events:none;
+    position:absolute;
+    left: -10%;
+    right: -10%;
+    top: 0;
+    height: 0%;
+    background:
+        radial-gradient(circle at 20% 0%, rgba(255,215,0,0.60), rgba(255,215,0,0) 45%),
+        linear-gradient(180deg,
+            rgba(255,215,0,0.65) 0%,
+            rgba(184,134,11,0.45) 30%,
+            rgba(255,215,0,0.10) 60%,
+            rgba(0,0,0,0) 100%);
+    filter: blur(12px) saturate(150%);
+    opacity: 0.95;
+    animation: lgcFill 0.95s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes lgcFill{
+    0%{ height: 0%; opacity: 0; }
+    20%{ opacity: 1; }
+    100%{ height: 115%; opacity: .35; }
+}
+
+.lgc-content{
+    position: relative;
+    z-index: 2;
+    display: contents;
+}
+
+.lgc-card-glass{
+    border-radius: 22px;
+    border: 1px solid rgba(255,215,0,0.16);
+    background: rgba(0,0,0,0.18);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    backdrop-filter: blur(16px) saturate(170%);
+    -webkit-backdrop-filter: blur(16px) saturate(170%);
+    overflow: hidden;
+}
+
+/* Профиль слева */
+.lgc-profile{
+    padding: 18px 16px;
+    display:flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.lgc-avatar-frame{
+    width: 112px;
+    height: 112px;
+    border-radius: 26px;
+    margin: 6px auto 0;
+    padding: 3px;
+    background: linear-gradient(135deg, rgba(255,215,0,1) 0%, rgba(184,134,11,0.8) 30%, rgba(255,215,0,0.65) 60%, rgba(255,215,0,0.3) 100%);
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,0.08),
+        0 18px 40px rgba(255,215,0,0.10),
+        inset 0 0 30px rgba(255,215,0,0.18);
+    position: relative;
+    overflow: hidden;
+}
+.lgc-avatar-frame::after{
+    content:'';
+    position:absolute;
+    inset:-40%;
+    background: linear-gradient(115deg, rgba(255,215,0,0) 0%, rgba(255,215,0,0.35) 35%, rgba(255,215,0,0) 70%);
+    transform: rotate(18deg) translateX(-25%);
+    animation: lgcAvatarSheen 2.8s ease-in-out infinite;
+}
+@keyframes lgcAvatarSheen{
+    0%,100%{ transform: rotate(18deg) translateX(-25%); opacity: .45; }
+    50%{ transform: rotate(18deg) translateX(15%); opacity: .95; }
+}
+.lgc-avatar-img{
+    width:100%;
+    height:100%;
+    border-radius: 23px;
+    object-fit: cover;
+    display:block;
+    background: rgba(255,215,0,0.06);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.25);
+}
+.lgc-nick{
+    text-align:center;
+    font-family:'Syncopate', sans-serif;
+    font-weight: 900;
+    letter-spacing: 2px;
+    font-size: 1.05rem;
+    color: #fff;
+    position: relative;
+}
+.lgc-nick::after{
+    content:'';
+    display:block;
+    width: 140px;
+    height: 2px;
+    margin: 8px auto 0;
+    background: linear-gradient(90deg, rgba(255,215,0,0), rgba(255,215,0,0.9), rgba(255,215,0,0));
+    opacity: .7;
+    filter: blur(.2px);
+}
+.lgc-tagline{
+    text-align:center;
+    color: rgba(255,255,255,0.55);
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.lgc-profile .lgc-stats{
+    margin-top:auto;
+    display:flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.lgc-mini-stat{
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,215,0,0.10);
+    border-radius: 16px;
+    padding: 12px 12px;
+}
+.lgc-mini-stat small{
+    display:block;
+    color: rgba(255,255,255,0.50);
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 900;
+}
+.lgc-mini-stat .val{
+    margin-top: 6px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: var(--gold);
+    font-size: 0.95rem;
+    text-align:left;
+}
+
+/* Центр: кошелек + XP */
+.lgc-center{
+    padding: 18px 18px 16px;
+    display:flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.lgc-balance-block{
+    background:
+        radial-gradient(circle at 10% 0%, rgba(255,215,0,0.15), transparent 55%),
+        rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,215,0,0.18);
+    border-radius: 22px;
+    padding: 18px 16px;
+    position: relative;
+    overflow: hidden;
+}
+.lgc-balance-title{
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 900;
+    font-size: 0.65rem;
+    margin-bottom: 10px;
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+}
+.lgc-balance-value{
+    font-family:'Syncopate', sans-serif;
+    font-weight: 900;
+    letter-spacing: 1px;
+    font-size: 2.45rem;
+    line-height: 1;
+    margin-bottom: 14px;
+
+    background: linear-gradient(90deg,
+        #fff3a1 0%,
+        #ffd700 12%,
+        #b8860b 28%,
+        #fff3a1 45%,
+        #ffd700 62%,
+        #b8860b 78%,
+        #fff3a1 100%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: lgcGoldText 2.4s linear infinite;
+    filter: drop-shadow(0 0 18px rgba(255,215,0,0.22));
+}
+@keyframes lgcGoldText{
+    0%{ background-position: 0% 50%; }
+    100%{ background-position: 200% 50%; }
+}
+
+/* Кнопки: Пополнить (green gold) / Вывести (мат. glass) */
+.lgc-actions{
+    display:flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.lgc-btn{
+    cursor:pointer;
+    border-radius: 16px;
+    padding: 12px 16px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.12);
+    transition: 0.25s ease;
+    user-select:none;
+}
+.lgc-btn:active{ transform: translateY(1px) scale(0.99); }
+
+.lgc-btn-deposit{
+    color:#061a0b;
+    background:
+        linear-gradient(135deg, rgba(140,255,140,0.85) 0%, rgba(180,255,180,0.35) 35%, rgba(255,215,0,0.45) 100%);
+    border-color: rgba(140,255,140,0.35);
+    box-shadow: 0 0 0 1px rgba(255,215,0,0.08), 0 12px 30px rgba(30,255,120,0.10);
+    position: relative;
+    overflow:hidden;
+}
+.lgc-btn-deposit::after{
+    content:'';
+    position:absolute;
+    top:-120%;
+    left:-40%;
+    width: 140%;
+    height: 260%;
+    background: linear-gradient(115deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 40%, rgba(255,255,255,0) 70%);
+    transform: rotate(10deg) translateX(-20%);
+    opacity: .35;
+    transition: 0.35s ease;
+}
+.lgc-btn-deposit:hover::after{
+    opacity: .75;
+    transform: rotate(10deg) translateX(18%);
+}
+.lgc-btn-deposit:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 1px rgba(255,215,0,0.14), 0 18px 40px rgba(30,255,120,0.16);
+    filter: saturate(1.08);
+}
+
+.lgc-btn-withdraw{
+    color: rgba(255,255,255,0.75);
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(255,255,255,0.10);
+    backdrop-filter: blur(12px) saturate(170%);
+    -webkit-backdrop-filter: blur(12px) saturate(170%);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+}
+.lgc-btn-withdraw:hover{
+    transform: translateY(-2px);
+    border-color: rgba(255,215,0,0.25);
+    background: rgba(255,255,255,0.05);
+}
+
+/* XP */
+.lgc-xp-block{
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,215,0,0.14);
+    border-radius: 22px;
+    padding: 16px 14px 14px;
+}
+.lgc-xp-top{
+    display:flex;
+    justify-content: space-between;
+    align-items:flex-end;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.lgc-xp-top .lvl-current{
+    font-family:'Syncopate', sans-serif;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--gold);
+    font-size: 0.9rem;
+}
+.lgc-xp-top .lvl-next{
+    color: rgba(255,255,255,0.55);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 900;
+    text-align:right;
+}
+.lgc-xp-bar{
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.06);
+    overflow:hidden;
+    position: relative;
+}
+.lgc-xp-fill{
+    height: 100%;
+    width: 38%; /* <-- поменяй процент при необходимости */
+    background: linear-gradient(90deg, rgba(255,215,0,0.95) 0%, rgba(184,134,11,0.95) 65%, rgba(255,215,0,0.85) 100%);
+    box-shadow: 0 0 18px rgba(255,215,0,0.25);
+    position: relative;
+}
+.lgc-xp-fill::after{
+    content:'';
+    position:absolute;
+    inset:-20px -30px;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.18) 45%, rgba(255,255,255,0) 80%);
+    transform: translateX(-60%);
+    animation: lgcXpShine 1.6s ease-in-out infinite;
+}
+@keyframes lgcXpShine{
+    0%,100%{ transform: translateX(-60%); opacity: .25; }
+    50%{ transform: translateX(25%); opacity: .65; }
+}
+
+.lgc-xp-ticks{
+    display:flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    color: rgba(255,255,255,0.45);
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 900;
+}
+.lgc-xp-ticks span{
+    white-space: nowrap;
+}
+.lgc-xp-ticks .active{
+    color: rgba(255,215,0,0.85);
+    text-shadow: 0 0 12px rgba(255,215,0,0.20);
+}
+
+/* Правый: Leviathan AI чат */
+.lgc-ai{
+    padding: 16px 14px;
+    display:flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.lgc-ai-header{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    gap: 10px;
+}
+.lgc-ai-title{
+    font-family:'Syncopate', sans-serif;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--gold);
+    font-size: 0.95rem;
+}
+.lgc-ai-badge{
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 900;
+    color: rgba(255,255,255,0.55);
+    background: rgba(255,215,0,0.08);
+    border: 1px solid rgba(255,215,0,0.18);
+    padding: 6px 10px;
+    border-radius: 999px;
+}
+
+.lgc-ai-chat{
+    height: 200px;
+    overflow-y:auto;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.22);
+    padding: 12px;
+    display:flex;
+    flex-direction: column;
+    gap: 10px;
+    scroll-behavior: smooth;
+}
+.lgc-ai-msg{
+    font-size: 0.82rem;
+    line-height: 1.35;
+    border-radius: 16px;
+    padding: 10px 12px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.lgc-ai-msg.ai{
+    background: rgba(255,255,255,0.03);
+    color: rgba(255,255,255,0.82);
+    align-self: flex-start;
+    position: relative;
+}
+.lgc-ai-msg.ai::before{
+    content:'';
+    position:absolute;
+    left:-8px;
+    top: 14px;
+    width: 8px;
+    height: 8px;
+    background: rgba(255,215,0,0.22);
+    border-left: 1px solid rgba(255,215,0,0.25);
+    border-bottom: 1px solid rgba(255,215,0,0.25);
+    transform: rotate(45deg);
+    border-radius: 2px;
+}
+.lgc-ai-msg.user{
+    background: rgba(255,215,0,0.06);
+    color: rgba(255,255,255,0.88);
+    align-self: flex-end;
+    border-color: rgba(255,215,0,0.18);
+}
+
+.lgc-ai-input{
+    display:flex;
+    gap: 10px;
+    align-items:center;
+}
+.lgc-ai-field{
+    flex: 1;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 10px 12px;
+    color:#fff;
+    outline:none;
+    font-family: inherit;
+}
+.lgc-ai-send{
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,215,0,0.26);
+    background: linear-gradient(135deg, rgba(255,215,0,0.95) 0%, rgba(184,134,11,0.8) 100%);
+    cursor:pointer;
+    color:#000;
+    font-weight: 900;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 0 18px rgba(255,215,0,0.22);
+    transition: 0.25s ease;
+}
+.lgc-ai-send:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 0 26px rgba(255,215,0,0.30);
+}
+
+/* Появление элементов “после заливки” */
+.lgc-profile,
+.lgc-center,
+.lgc-ai{
+    animation: lgcChildIn 0.55s cubic-bezier(.16,1,.3,1) both;
+}
+.lgc-profile{ animation-delay: 0.28s; }
+.lgc-center{ animation-delay: 0.33s; }
+.lgc-ai{ animation-delay: 0.38s; }
+@keyframes lgcChildIn{
+    from{ opacity:0; transform: translateY(10px); filter: blur(10px); }
+    to{ opacity:1; transform: translateY(0); filter: blur(0); }
+}
