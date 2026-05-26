@@ -321,7 +321,7 @@
     </div>
 
     <div id="auth-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center;">
-        <div class="auth-pop auth-glass-card" style="max-width: 980px; width: calc(100vw - 40px); max-height: calc(100vh - 60px); overflow: hidden; padding: 22px;">
+<div class="auth-pop auth-glass-card" style="max-width: 420px; width: calc(100vw - 24px); max-height: calc(100vh - 40px); overflow: hidden; padding: 14px 16px 10px; box-shadow: 0 0 0 1px rgba(255,215,0,0.45), 0 0 35px rgba(255,215,0,0.18); backdrop-filter: blur(15px); background: rgba(255,255,255,0.02);">
             <!-- AUTH VIEW (Гость) -->
             <div id="auth-container">
                 <!-- REGISTRATION (only) -->
@@ -341,7 +341,7 @@
 
                     <button class="gold-btn-premium" onclick="handleRegister()">CREATE ACCOUNT</button>
 
-                    <div class="social-grid">
+<div class="social-grid" style="display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:nowrap;">
                         <div class="social-btn" role="button" tabindex="0" onclick="AuthSystem.loginWith('google')" onkeydown="if(event.key==='Enter') AuthSystem.loginWith('google')">
                             <i class="fab fa-google social-icon" aria-hidden="true"></i>
                             <span class="social-text">Google</span>
@@ -396,7 +396,7 @@
                     </button>
                 </div>
                 <div class="liquid-gold-cabinet-wrap" style="height: 100%; margin: 0;">
-                    <section class="liquid-gold-cabinet" aria-label="Профиль VIP (Liquid Gold Glass)" style="height: 100%; max-height: calc(100vh - 120px); overflow: hidden;">
+<section class="liquid-gold-cabinet" aria-label="Профиль VIP (Liquid Gold Glass)" style="height: 100%; overflow: hidden;">
                         <div class="lgc-gold-fill"></div>
                         <div class="lgc-sheen"></div>
 
@@ -426,7 +426,7 @@
                                 <div class="lgc-balance-value" id="balance-amount" aria-label="Balance">50 000</div>
 
                                 <div class="lgc-actions">
-<button class="lgc-btn lgc-btn-deposit top-up-btn" type="button">Top up</button>
+<button class="lgc-btn lgc-btn-deposit top-up-btn" type="button" onclick="document.querySelector('button.btn-deposit-top')?.click()">Top up</button>
                                     <button class="lgc-btn lgc-btn-withdraw" type="button">Withdraw</button>
                                 </div>
                             </div>
@@ -625,4 +625,3 @@
 </body>
 
 </html>
-
