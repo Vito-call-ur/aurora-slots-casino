@@ -36,29 +36,34 @@ function updateBalanceUI() {
 window.AuthSystem = {
     currentUser: null,
 
-    // ГЛАВНЫЙ ТРИГГЕР (Клик на аву)
-    openAuthOrProfile: function() {
+    _rememberKeys: {
+        userName: 'vip_user_name',
+        userPhoto: 'vip_user_photo',
+        balance: 'balance'
+    },
+
+    // Переключатель экранов внутри #auth-modal
+    openAuthOrProfile: function () {
         const modal = document.getElementById('auth-modal');
         const authView = document.getElementById('auth-container');
         const profView = document.getElementById('profile-container');
 
-        if (modal) {
-            modal.style.display = 'flex';
-            if (this.currentUser) {
-                // Юзер в системе -> ПОКАЗЫВАЕМ КАБИНЕТ
-                authView.style.display = 'none';
-                profView.style.display = 'block';
-                this.syncProfile();
-            } else {
-                // Гость -> ПОКАЗЫВАЕМ ВХОД
-                authView.style.display = 'block';
-                profView.style.display = 'none';
-            }
+        if (!modal) return;
+
+        modal.style.display = 'flex';
+
+        if (this.currentUser) {
+            if (authView) authView.style.display = 'none';
+            if (profView) profView.style.display = 'block';
+            this.syncProfile();
+        } else {
+            if (authView) authView.style.display = 'block';
+            if (profView) profView.style.display = 'none';
         }
     },
 
     // СИНХРОНИЗАЦИЯ ДАННЫХ ВНУТРИ КАБИНЕТА
-    syncProfile: function() {
+    syncProfile: function () {
         if (!this.currentUser) return;
 
         const nameDisplay = document.getElementById('user-display-name');
@@ -66,7 +71,15 @@ window.AuthSystem = {
         const vipStatus = document.getElementById('user-vip-status');
 
         if (nameDisplay) nameDisplay.innerText = this.currentUser.displayName || "LEVIATHAN_BOSS";
-        if (bigAvatar && this.currentUser.photoURL) bigAvatar.src = this.currentUser.photoURL;
+
+        if (bigAvatar) {
+            if (this.currentUser.photoURL) {
+                bigAvatar.src = this.currentUser.photoURL;
+                bigAvatar.style.display = 'block';
+            } else {
+                bigAvatar.style.display = 'none';
+            }
+        }
 
         // ПРОВЕРКА VIP СТАТУСА (СТРОГО!)
         if (vipStatus) {
@@ -81,30 +94,147 @@ window.AuthSystem = {
                 vipStatus.style.color = "#ffffff";
             }
         }
+
         updateBalanceUI();
     },
 
-    hideAuth: function() {
-        document.getElementById('auth-modal').style.display = 'none';
+    saveRememberMeFromUser: function (user) {
+        if (!user) return;
+
+        try {
+            localStorage.setItem(this._rememberKeys.userName, user.displayName || 'LEVIATHAN_BOSS');
+            if (user.photoURL) localStorage.setItem(this._rememberKeys.userPhoto, user.photoURL);
+
+            // balance у нас и так живёт в localStorage, но продублируем
+            localStorage.setItem(this._rememberKeys.balance, String(balance));
+
+            // подмена авы в хедере (сразу после входа)
+            const headerFrameImg = document.getElementById('profile-avatar-img');
+            const headerDefault = document.getElementById('profile-default-icon');
+            const headerFrame = document.getElementById('profile-avatar-frame');
+
+            if (headerFrameImg && user.photoURL) {
+                headerFrameImg.src = user.photoURL;
+                headerFrameImg.style.display = 'block';
+            }
+            if (headerFrame) headerFrame.style.display = 'inline-flex';
+            if (headerDefault) headerDefault.style.display = 'none';
+        } catch (e) {
+            console.warn('RememberMe save failed:', e);
+        }
     },
 
-    loginWith: function(provider) {
+    // Вызывается после успешного входа, но может быть и из любых колбеков
+    afterSuccessfulLogin: function (user) {
+        this.currentUser = user || null;
+        this.saveRememberMeFromUser(this.currentUser);
+        this.openAuthOrProfile();
+    },
+
+    // Поднимаем remember-me при загрузке страницы (без Firebase)
+    applyRememberMeOnBoot: function () {
+        try {
+            const photo = localStorage.getItem(this._rememberKeys.userPhoto);
+            const name = localStorage.getItem(this._rememberKeys.userName);
+
+            if (!photo) return false;
+
+            // Подмена авы в хедере
+            const headerFrameImg = document.getElementById('profile-avatar-img');
+            const headerDefault = document.getElementById('profile-default-icon');
+            const headerFrame = document.getElementById('profile-avatar-frame');
+
+            if (headerFrameImg) {
+                headerFrameImg.src = photo;
+                headerFrameImg.style.display = 'block';
+            }
+            if (headerFrame) headerFrame.style.display = 'inline-flex';
+            if (headerDefault) headerDefault.style.display = 'none';
+
+            // Имитация "авторизован" для отображения кабинки
+            this.currentUser = {
+                displayName: name || 'LEVIATHAN_BOSS',
+                photoURL: photo
+            };
+
+            // обновим баланс UI (balance уже подхватили вверху файла)
+            updateBalanceUI();
+
+            // открыть модалку сразу и показать профиль
+            this.openAuthOrProfile();
+            return true;
+        } catch (e) {
+            console.warn('RememberMe boot failed:', e);
+            return false;
+        }
+    },
+
+    // Выйти “по следам” (чистим remember-me и возвращаем экран входа)
+    rememberLogout: function () {
+        try {
+            localStorage.removeItem(this._rememberKeys.userName);
+            localStorage.removeItem(this._rememberKeys.userPhoto);
+            // balance оставим? по ТЗ он должен очиститься как “следы”, но баланс и так хранится;
+            // очистим чтобы было чисто
+            localStorage.removeItem(this._rememberKeys.balance);
+        } catch (e) {}
+
+        // Сбрасываем текущий UI-state
+        this.currentUser = null;
+
+        // Если Firebase тоже залогинен — можно не трогать его сессии (по ТЗ “пока не очистит кэш”),
+        // но UI обязан вернуться на signup.
+        this.openAuthOrProfile();
+
+        // обновим баланс обратно к дефолту (как в начале файла)
+        balance = parseInt(localStorage.getItem('balance')) || 50000;
+        updateBalanceUI();
+
+        // если загружались через openAuthOrProfile — фиксируем видимость
+        const modal = document.getElementById('auth-modal');
+        if (modal) modal.style.display = 'flex';
+    },
+
+    hideAuth: function () {
+        const modal = document.getElementById('auth-modal');
+        if (modal) modal.style.display = 'none';
+    },
+
+    loginWith: function (provider) {
         if (provider === 'google') {
             auth.signInWithPopup(googleProvider).then((res) => {
-                this.currentUser = res.user;
-                this.hideAuth();
-                location.reload(); // Перезагружаем для чистого рендера
+                this.afterSuccessfulLogin(res.user);
             }).catch(err => alert("Connection error: " + err.message));
         }
     },
 
-    logout: function() {
+    logout: function () {
         if (confirm("TERMINATE CONNECTION WITH LEVIATHAN?")) {
             auth.signOut().then(() => {
-                localStorage.clear();
-                location.reload();
+                this.currentUser = null;
+                this.rememberLogout();
             });
         }
+    },
+
+    // Подписка на Firebase auth-состояние (настоящая авторизация)
+    initAuthState: function () {
+        const self = this;
+        auth.onAuthStateChanged((user) => {
+            self.currentUser = user || null;
+
+            if (user) {
+                self.saveRememberMeFromUser(user);
+            }
+
+            // если модалка открыта — обновляем экран
+            const modal = document.getElementById('auth-modal');
+            if (modal && modal.style.display === 'flex') {
+                self.openAuthOrProfile();
+            }
+
+            updateBalanceUI();
+        });
     }
 };
 
@@ -282,6 +412,12 @@ window.closeGame = function() {
 
 // 7. SYSTEM BOOT (ЗАПУСК ВСЕХ СИСТЕМ)
 document.addEventListener('DOMContentLoaded', () => {
+    // Remember Me: если пользователь ранее логинился — сразу показываем кабинет,
+    // без повторной регистрации/SignUp.
+    try {
+        AuthSystem.applyRememberMeOnBoot();
+    } catch (e) {}
+
     // Запускаем движок лобби
     LeviatEngine.init();
 
@@ -348,22 +484,130 @@ if (aiSendBtn) {
     };
 }
 
-// Следим за состоянием Firebase
-auth.onAuthStateChanged((user) => {
-    if (user) {
-        AuthSystem.currentUser = user;
-        AuthSystem.syncProfile();
-        
-        // Ставим аву в хедер (ФИНАЛЬНЫЙ ФИКС ГЕЙ-НЕОНА)
-        const headAva = document.getElementById('logged-in-avatar');
-        const logoutIc = document.getElementById('logged-out-icon');
-        if (headAva && user.photoURL) {
-            headAva.src = user.photoURL;
-            headAva.style.display = 'block';
-            if (logoutIc) logoutIc.style.display = 'none';
+function setHeaderAvatar(photoUrl, displayName){
+    const frame = document.getElementById('profile-avatar-frame');
+    const img = document.getElementById('profile-avatar-img');
+    const defIcon = document.getElementById('profile-default-icon');
+
+    if (!frame) return;
+
+    frame.style.display = 'inline-flex';
+
+    if (img){
+        if (photoUrl) {
+            img.src = photoUrl;
+            img.style.display = 'block';
+        } else {
+            // no photo -> keep img hidden, frame visible
+            img.style.display = 'none';
         }
     }
+
+    if (defIcon) defIcon.style.display = 'none';
+
+    // store for persistence
+    try{
+        if (displayName) localStorage.setItem('telegram_display_name', displayName);
+        if (photoUrl) localStorage.setItem('telegram_photo_url', photoUrl);
+    }catch(_){}
+}
+
+// Restore (optional)
+try{
+    const savedPhoto = localStorage.getItem('telegram_photo_url');
+    const savedName = localStorage.getItem('telegram_display_name');
+    if (savedPhoto) setHeaderAvatar(savedPhoto, savedName);
+}catch(_){}
+
+/* Firebase auth-состояние:
+   AuthSystem.initAuthState() сам переключит auth/profile экран внутри модалки */
+AuthSystem.initAuthState();
+
+// Ставим аватар в хедер (золотая рамка)
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        if (user.photoURL) setHeaderAvatar(user.photoURL, user.displayName || 'User');
+    }
 });
+
+// --- Telegram Login Widget handler (bot: @LeviathanAuthBot) ---
+// Telegram виджеты обычно вызывают глобальный коллбек/публикуют данные в window.
+window.onTelegramLoginSuccess = function(payload){
+    // поддержка разных имен полей
+    const photoUrl =
+        payload?.user_photo_url ||
+        payload?.photo_url ||
+        payload?.user?.photo_url ||
+        payload?.user?.profile_photo_url ||
+        payload?.profile_photo_url ||
+        '';
+
+    const displayName =
+        payload?.user_name ||
+        payload?.first_name ||
+        payload?.last_name
+        ? [payload.first_name, payload.last_name].filter(Boolean).join(' ')
+        : (payload?.username || payload?.user?.username || payload?.full_name || '');
+
+    setHeaderAvatar(photoUrl || '', displayName || 'Telegram User');
+
+    // Важно: для Remember Me (чтобы после "регистрации" больше не показывать SIGN UP)
+    // мы сохраняем аватар/имя локально и переключаем modal в profile-состояние.
+    try {
+        const fakeUser = {
+            displayName: displayName || 'Telegram User',
+            photoURL: photoUrl || ''
+        };
+        AuthSystem.currentUser = fakeUser;
+        AuthSystem.saveRememberMeFromUser(fakeUser);
+        AuthSystem.openAuthOrProfile();
+    } catch (e) {}
+};
+
+// иногда коллбек приходит через onTelegramAuth / telegramLoginCallback
+window.onTelegramAuth = function(payload){
+    window.onTelegramLoginSuccess(payload);
+};
+
+/*
+ * если widget кладёт данные в window.TelegramLoginWidgetData
+ * или обновляет содержимое контейнера — поймаем это и дернем коллбек.
+ */
+setTimeout(() => {
+    try{
+        const w = window.TelegramLoginWidgetData;
+        if (w) window.onTelegramLoginSuccess(w);
+    }catch(_){}
+}, 1500);
+
+// DOM-based fallback: смотрим контейнер виджета на изменения
+try {
+    const widgetEl = document.getElementById('telegram-login-widget');
+    if (widgetEl && typeof MutationObserver !== 'undefined') {
+        const obs = new MutationObserver(() => {
+            try {
+                // часто виджет может отдавать данные через dataset:
+                const ds = widgetEl.dataset || {};
+                const photoUrl = ds.userPhotoUrl || ds.photoUrl || ds.userPhoto || ds.userpic || '';
+                const displayName = ds.userName || ds.username || ds.firstName || ds.fullName || 'Telegram User';
+                if (photoUrl || ds.user || ds.user_name || ds.userId) {
+                    window.onTelegramLoginSuccess({
+                        user_photo_url: photoUrl,
+                        user_name: displayName,
+                        ...ds
+                    });
+                }
+                // еще вариант: виджет может положить JSON в data-поле
+                const jsonStr = ds.payload || ds.authData || '';
+                if (jsonStr) {
+                    const maybeObj = JSON.parse(jsonStr);
+                    if (maybeObj) window.onTelegramLoginSuccess(maybeObj);
+                }
+            } catch(_){}
+        });
+        obs.observe(widgetEl, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-*'] });
+    }
+} catch(_){}
 
 console.log("LEVIATHAN ENGINE: ALL SYSTEMS NOMINAL. MONTE CARLO IS WAITING.");
 
@@ -635,12 +879,7 @@ window.logout = function() {
 };
 
 // Функция для твоего золотого профиля
-window.openAuth = function() {
-    console.log("Leviathan: Система активирована, открываю профиль...");
-    const modal = document.getElementById('auth-modal');
-    if(modal) {
-        modal.style.display = 'flex';
-    } else {
-        alert("Босс, окно 'auth-modal' не найдено в HTML!");
-    }
+window.openAuth = function () {
+    console.log("Leviathan: Открываю модальное окно профиля/входа...");
+    AuthSystem.openAuthOrProfile();
 };
