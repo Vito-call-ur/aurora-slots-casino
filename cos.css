@@ -1313,13 +1313,24 @@ body {
 .side-bottom-icons button {
     background: transparent;
     border: none;
-    color: var(--text-muted);
+
+    /* Mat-gray default */
+    color: #555 !important;
+
     font-size: 1.1rem;
     cursor: pointer;
-    transition: 0.3s;
+    transition: all 0.2s ease-in-out;
+    transform: translateY(0) scale(1);
 }
 
-/* Settings gear: по умолчанию серый, при hover — золотой */
+/* Hover effect for all 3 bottom icons */
+.side-bottom-icons button:hover {
+    color: var(--gold) !important; /* #ffd700 */
+    transform: translateY(-3px) scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.35));
+}
+
+/* Settings gear: оставляем точечную подсветку под i, но синхронизируем с общим hover */
 #settings-trigger-side i {
     color: #555 !important;
     transition: color 0.2s ease, filter 0.2s ease;
@@ -1327,10 +1338,6 @@ body {
 #settings-trigger-side:hover i {
     color: var(--gold) !important;
     filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.35));
-}
-
-.side-bottom-icons button:hover {
-    color: var(--accent-gold);
 }
 
 /* ===== PROMO CODE MODAL (ENTER PROMO CODE) ===== */
