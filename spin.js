@@ -42,27 +42,35 @@ window.AuthSystem = {
         balance: 'balance'
     },
 
-    // Переключатель экранов внутри #auth-modal
-    openAuthOrProfile: function () {
-        const modal = document.getElementById('auth-modal');
-        const authView = document.getElementById('auth-container');
-        const profView = document.getElementById('profile-container');
-
-        if (!modal) return;
-
-        modal.style.display = 'flex';
-
-        if (this.currentUser) {
-            if (authView) authView.style.display = 'none';
-            if (profView) profView.style.display = 'block';
-            this.syncProfile();
-        } else {
-            if (authView) authView.style.display = 'block';
-            if (profView) profView.style.display = 'none';
+    // --- независимые окна: #auth-modal и #profile-modal ---
+    openAuthWindow: function () {
+        const authModal = document.getElementById('auth-modal');
+        const profileModal = document.getElementById('profile-modal');
+        if (authModal) {
+            authModal.style.display = 'flex';
+            authModal.classList.remove('active');
+            // auth-pop анимация управляется существующим кодом в index.html через .active
+            void authModal.offsetWidth;
+            authModal.classList.add('active');
         }
+        if (profileModal) profileModal.style.display = 'none';
     },
 
-    // СИНХРОНИЗАЦИЯ ДАННЫХ ВНУТРИ КАБИНЕТА
+    openProfileWindow: function () {
+        const authModal = document.getElementById('auth-modal');
+        const profileModal = document.getElementById('profile-modal');
+        if (authModal) authModal.style.display = 'none';
+        if (profileModal) profileModal.style.display = 'flex';
+        this.syncProfile();
+    },
+
+    // Переключатель экранов
+    openAuthOrProfile: function () {
+        if (this.currentUser) return this.openProfileWindow();
+        return this.openAuthWindow();
+    },
+
+    // СИНХРОНИЗАЦИЯ ДАННЫХ КАБИНЕТА
     syncProfile: function () {
         if (!this.currentUser) return;
 
@@ -94,6 +102,10 @@ window.AuthSystem = {
                 vipStatus.style.color = "#ffffff";
             }
         }
+
+        // баланс кабинета
+        const profBal = document.getElementById('prof-balance');
+        if (profBal) profBal.innerText = balance.toLocaleString();
 
         updateBalanceUI();
     },
@@ -448,11 +460,42 @@ document.addEventListener('DOMContentLoaded', () => {
         if (catMenu && !catTrigger.contains(e.target)) {
             catMenu.style.display = 'none';
         }
+
         const authModal = document.getElementById('auth-modal');
         if (e.target === authModal) {
             AuthSystem.hideAuth();
         }
+
+        const profileModal = document.getElementById('profile-modal');
+        if (e.target === profileModal) {
+            window.closeProfile?.();
+            profileModal.style.display = 'none';
+        }
     };
+
+    // ====== QUICK FIX: открыть Личный кабинет по клику на профиль в хедере ======
+    // Селектор кнопки профиля в index.html:
+    // <button class="btn-profile-icon" onclick="AuthSystem.openProfileWindow()"...>
+    const profileBtn = document.querySelector('button.btn-profile-icon') || document.getElementById('profile-avatar-frame');
+    const profileModal = document.getElementById('profile-modal');
+
+    if (profileBtn && profileModal) {
+        profileBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            profileModal.style.display = 'flex';
+            // если auth модалка открыта — выключаем
+            const authModal = document.getElementById('auth-modal');
+            if (authModal) authModal.style.display = 'none';
+
+            // синхронизируем данные (если текущий юзер известен)
+            try {
+                AuthSystem.syncProfile?.();
+            } catch (_) {}
+        });
+    }
+
 });
 
 // 8. AI INTERFACE (LEVIATHAN AI)
