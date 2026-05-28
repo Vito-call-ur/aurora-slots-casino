@@ -566,6 +566,54 @@ try{
    AuthSystem.initAuthState() сам переключит auth/profile экран внутри модалки */
 AuthSystem.initAuthState();
 
+/* === PROMO / GIFTS (left sidebar) === */
+const PROMO_CODE = 'Leviatha1488';
+const PROMO_REWARD = 228;
+
+window.openPromoModal = function () {
+    const modal = document.getElementById('promo-modal');
+    if (!modal) return;
+
+    const input = document.getElementById('promo-code-input');
+    if (input) input.value = '';
+
+    modal.style.display = 'flex';
+    input?.focus?.();
+};
+
+window.closePromoModal = function () {
+    const modal = document.getElementById('promo-modal');
+    if (!modal) return;
+    modal.style.display = 'none';
+};
+
+window.applyPromoCode = function () {
+    const input = document.getElementById('promo-code-input');
+    const raw = (input?.value || '').trim();
+    if (!raw) {
+        alert('Enter promo code, Boss!');
+        return;
+    }
+
+    if (raw !== PROMO_CODE) {
+        alert('Invalid promo code, Boss!');
+        return;
+    }
+
+    // начисляем награду
+    balance += PROMO_REWARD;
+    updateBalanceUI();
+
+    // опционально: отметим факт активации в localStorage, чтобы не спамили при повторных запросах
+    try {
+        localStorage.setItem(`promo_${PROMO_CODE}_used`, '1');
+    } catch (_) {}
+
+    alert(`Promo activated! +${PROMO_REWARD} LVC`);
+
+    closePromoModal();
+};
+
 // Ставим аватар в хедер (золотая рамка)
 auth.onAuthStateChanged((user) => {
     if (user) {
