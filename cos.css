@@ -545,8 +545,33 @@ body {
     background: var(--bg-card);
     border: 1px solid rgba(255, 255, 255, 0.05);
     position: relative;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.2s ease-in-out;
 }
+
+/* КАТЕГОРИИ: не ломаем ховер/перетаскивание из‑за декоративных оверлеев.
+   Для карточек категорий отключаем pointer-events у ВСЕХ внутренних элементов,
+   чтобы при переходе мыши с текста на иконку/элементы не происходил "дрожащий" перезапуск. */
+.category-card * {
+    pointer-events: none !important;
+}
+
+/* Плавные переходы для карточек категорий */
+.category-card {
+    transition: all 0.2s ease-in-out !important;
+}
+
+/* ====== FINAL OVERRIDES (категории: стабильный hover/click) ======
+   Делается в конце файла, чтобы не зависеть от дублей выше и не ломать DOM/анимации.
+*/
+.category-card,
+.category-card * {
+    pointer-events: none !important;
+}
+.category-card {
+    transition: all 0.2s ease-in-out !important;
+}
+
+
 
 .category-card .card-overlay {
     background: linear-gradient(to top, rgba(0,0,0,0.9) 20%, transparent);
@@ -1294,8 +1319,119 @@ body {
     transition: 0.3s;
 }
 
+/* Settings gear: по умолчанию серый, при hover — золотой */
+#settings-trigger-side i {
+    color: #555 !important;
+    transition: color 0.2s ease, filter 0.2s ease;
+}
+#settings-trigger-side:hover i {
+    color: var(--gold) !important;
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.35));
+}
+
 .side-bottom-icons button:hover {
     color: var(--accent-gold);
+}
+
+/* ===== PROMO CODE MODAL (ENTER PROMO CODE) ===== */
+#promo-modal .modal-content-promo {
+    max-width: 420px;
+    width: 92%;
+    padding: 22px 18px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,215,0,0.12);
+    animation: glassAppear 0.25s ease both;
+}
+
+.promo-title {
+    font-family: 'Syncopate', sans-serif;
+    letter-spacing: 6px;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: 14px;
+    color: var(--gold);
+    margin-top: 8px;
+    margin-bottom: 10px;
+}
+
+.promo-subtext {
+    font-size: 11px;
+    opacity: 0.6;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 14px;
+}
+
+.promo-input {
+    width: 100%;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,215,0,0.25);
+    border-radius: 14px;
+    padding: 12px 14px;
+    color: #fff;
+    outline: none;
+    font-family: 'Space Grotesk';
+    letter-spacing: 2px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.promo-input:focus {
+    border-color: rgba(255,215,0,0.65);
+    box-shadow: 0 0 0 4px rgba(255,215,0,0.12);
+}
+
+.promo-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 14px;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-promo-activate {
+    border: none;
+    cursor: pointer;
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #000;
+    background: linear-gradient(135deg, rgba(140,255,140,0.85) 0%, rgba(180,255,180,0.35) 35%, rgba(255,215,0,0.45) 100%);
+    box-shadow: 0 14px 30px rgba(30,255,120,0.10), 0 0 0 1px rgba(255,215,0,0.10);
+    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+    width: 100%;
+}
+
+.btn-promo-activate:hover {
+    transform: translateY(-2px);
+    filter: saturate(1.1);
+    box-shadow: 0 20px 40px rgba(30,255,120,0.14), 0 0 0 1px rgba(255,215,0,0.18);
+}
+
+.promo-msg {
+    margin-top: 12px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 12px;
+    text-align: center;
+    min-height: 18px;
+}
+
+.promo-msg.valid {
+    color: #00ff66;
+    text-shadow: 0 0 10px rgba(0,255,102,0.25);
+}
+
+.promo-msg.invalid {
+    color: #ff4d4d;
+    text-shadow: 0 0 10px rgba(255,77,77,0.25);
 }
 
 /* Розовая плашка для Турниров */
@@ -2395,4 +2531,43 @@ body {
 @keyframes lgcChildIn{
     from{ opacity:0; transform: translateY(10px); filter: blur(10px); }
     to{ opacity:1; transform: translateY(0); filter: blur(0); }
+}
+
+/* =========================
+   Default states
+   ========================= */
+
+/* Кабинет по умолчанию скрыт при старте сайта */
+#profile-modal{
+    display: none !important;
+}
+#user-cabinet{
+    display: none !important;
+}
+
+/* Исправление категорий от Kimi */
+.category-card, .filter-btn {
+    transition: all 0.2s ease-in-out !important;
+}
+.category-card *, .filter-btn * {
+    pointer-events: none !important;
+}
+
+/* ====== AUTO-OVERRIDES (stability) ======
+   Стабилизация категорий + независимость модалок.
+   Этот блок в КОНЦЕ файла, чтобы перекрывать любые дубляжи выше.
+*/
+#profile-modal {
+    display: none !important;
+}
+#user-cabinet {
+    display: none !important;
+}
+
+.category-card {
+    transition: all 0.2s ease-in-out !important;
+}
+
+.category-card * {
+    pointer-events: none !important;
 }
