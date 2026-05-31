@@ -25,11 +25,17 @@ function updateBalanceUI() {
     const balTop = document.getElementById('balance-amount');
     const balProf = document.getElementById('prof-balance');
     const formatted = balance.toLocaleString();
-    
-    if (balTop) balTop.innerText = formatted;
-    if (balProf) balProf.innerText = formatted;
-    
+    const label = `${formatted} LVC`;
+
+    if (balTop) balTop.innerText = label;
+    if (balProf) balProf.innerText = label;
+
     localStorage.setItem('balance', balance);
+
+    const profileModal = document.getElementById('profile-modal');
+    if (profileModal?.classList.contains('is-open') && AuthSystem?.syncProfile) {
+        AuthSystem.syncProfile();
+    }
 }
 
 // 4. AUTH & PROFILE SYSTEM
@@ -42,14 +48,41 @@ window.AuthSystem = {
         balance: 'balance'
     },
 
-    // --- независимые окна: #auth-modal и #profile-modal ---
+    _vipTiers: [
+        { id: 'BRONZE', min: 0, next: 100000, nextLabel: 'SILVER', color: '#cd7f32' },
+        { id: 'SILVER', min: 100000, next: 500000, nextLabel: 'GOLD', color: '#c0c0c0' },
+        { id: 'GOLD', min: 500000, next: null, nextLabel: null, color: '#ffd700' }
+    ],
+
+    isAuthenticated: function () {
+        if (this.currentUser) return true;
+        if (auth.currentUser) return true;
+        return !!localStorage.getItem(this._rememberKeys.userName);
+    },
+
+    getSessionUser: function () {
+        if (this.currentUser) return this.currentUser;
+        if (auth.currentUser) {
+            return {
+                displayName: auth.currentUser.displayName || localStorage.getItem(this._rememberKeys.userName) || 'LEVIATHAN_BOSS',
+                photoURL: auth.currentUser.photoURL || localStorage.getItem(this._rememberKeys.userPhoto) || ''
+            };
+        }
+        const name = localStorage.getItem(this._rememberKeys.userName);
+        if (!name) return null;
+        return {
+            displayName: name,
+            photoURL: localStorage.getItem(this._rememberKeys.userPhoto) || ''
+        };
+    },
+
     openAuthWindow: function () {
         const authModal = document.getElementById('auth-modal');
         const profileModal = document.getElementById('profile-modal');
+        this.closeProfileWindow();
         if (authModal) {
             authModal.style.display = 'flex';
-            authModal.classList.remove('active');
-            // auth-pop анимация управляется существующим кодом в index.html через .active
+            authModal.classList.remove('active', 'closing');
             void authModal.offsetWidth;
             authModal.classList.add('active');
         }
@@ -59,55 +92,145 @@ window.AuthSystem = {
     openProfileWindow: function () {
         const authModal = document.getElementById('auth-modal');
         const profileModal = document.getElementById('profile-modal');
-        if (authModal) authModal.style.display = 'none';
-        if (profileModal) profileModal.style.display = 'flex';
+        if (authModal) {
+            authModal.classList.remove('active');
+            authModal.style.display = 'none';
+        }
+        if (!profileModal) return;
+
+        this.currentUser = this.getSessionUser();
+        if (!this.currentUser) {
+            this.openAuthWindow();
+            return;
+        }
+
         this.syncProfile();
+
+        profileModal.style.display = 'flex';
+        profileModal.classList.remove('closing');
+        void profileModal.offsetWidth;
+        profileModal.classList.add('is-open');
     },
 
-    // Переключатель экранов
+    closeProfileWindow: function () {
+        const profileModal = document.getElementById('profile-modal');
+        if (!profileModal || !profileModal.classList.contains('is-open')) {
+            if (profileModal) {
+                profileModal.classList.remove('is-open', 'closing');
+                profileModal.style.display = 'none';
+            }
+            return;
+        }
+
+        profileModal.classList.remove('is-open');
+        profileModal.classList.add('closing');
+        setTimeout(() => {
+            profileModal.classList.remove('closing');
+            profileModal.style.display = 'none';
+        }, 320);
+    },
+
     openAuthOrProfile: function () {
-        if (this.currentUser) return this.openProfileWindow();
+        if (this.isAuthenticated()) return this.openProfileWindow();
         return this.openAuthWindow();
     },
 
-    // СИНХРОНИЗАЦИЯ ДАННЫХ КАБИНЕТА
+    openDepositFromCabinet: function () {
+        this.closeProfileWindow();
+        const depositModal = document.getElementById('deposit-modal');
+        if (depositModal) depositModal.style.display = 'flex';
+    },
+
+    registerLocalUser: function () {
+        const usernameEl = document.getElementById('auth-signup-username');
+        const passwordEl = document.getElementById('auth-signup-password');
+        const username = (usernameEl?.value || '').trim();
+        const password = (passwordEl?.value || '').trim();
+
+        if (!username) {
+            alert('Enter username, Boss!');
+            usernameEl?.focus();
+            return;
+        }
+        if (!password) {
+            alert('Create a password to continue.');
+            passwordEl?.focus();
+            return;
+        }
+
+        const user = { displayName: username, photoURL: '' };
+        this.currentUser = user;
+        this.saveRememberMeFromUser(user);
+
+        if (typeof closeAuth === 'function') closeAuth();
+        this.openProfileWindow();
+    },
+
+    syncProfileXP: function (bal) {
+        const amount = typeof bal === 'number' ? bal : balance;
+        let tier = this._vipTiers[0];
+        if (amount >= 500000) tier = this._vipTiers[2];
+        else if (amount >= 100000) tier = this._vipTiers[1];
+
+        const vipStatus = document.getElementById('user-vip-status');
+        if (vipStatus) {
+            vipStatus.innerText = `VIP • ${tier.id}`;
+            vipStatus.style.color = tier.color;
+        }
+
+        let pct = 100;
+        if (tier.next != null) {
+            pct = Math.min(100, Math.max(0, ((amount - tier.min) / (tier.next - tier.min)) * 100));
+        }
+
+        const fill = document.getElementById('xp-fill');
+        if (fill) fill.style.width = `${pct}%`;
+
+        const level = Math.max(1, Math.min(99, Math.floor(amount / 7500) + 1));
+        const meta = document.getElementById('xp-meta');
+        if (meta) {
+            if (tier.next != null) {
+                const remaining = Math.max(0, tier.next - amount);
+                meta.innerText = `Level ${level} · To ${tier.nextLabel}: ${remaining.toLocaleString()} LVC`;
+            } else {
+                meta.innerText = `Level ${level} · MAX TIER`;
+            }
+        }
+
+        const ticks = document.querySelectorAll('.lgc-xp-ticks span');
+        ticks.forEach((tick, i) => {
+            const threshold = i * 25;
+            tick.classList.toggle('active', pct >= threshold);
+        });
+    },
+
     syncProfile: function () {
-        if (!this.currentUser) return;
+        const user = this.getSessionUser();
+        if (!user) return;
 
         const nameDisplay = document.getElementById('user-display-name');
         const bigAvatar = document.getElementById('user-big-avatar');
-        const vipStatus = document.getElementById('user-vip-status');
+        const avatarFallback = document.getElementById('user-avatar-fallback');
 
-        if (nameDisplay) nameDisplay.innerText = this.currentUser.displayName || "LEVIATHAN_BOSS";
+        if (nameDisplay) nameDisplay.innerText = user.displayName || 'LEVIATHAN_BOSS';
 
-        if (bigAvatar) {
-            if (this.currentUser.photoURL) {
-                bigAvatar.src = this.currentUser.photoURL;
+        if (bigAvatar && avatarFallback) {
+            if (user.photoURL) {
+                bigAvatar.src = user.photoURL;
                 bigAvatar.style.display = 'block';
+                avatarFallback.style.display = 'none';
             } else {
+                bigAvatar.removeAttribute('src');
                 bigAvatar.style.display = 'none';
+                avatarFallback.style.display = 'flex';
+                avatarFallback.innerHTML = `<span class="lgc-avatar-letter">${(user.displayName || 'L').charAt(0).toUpperCase()}</span>`;
             }
         }
 
-        // ПРОВЕРКА VIP СТАТУСА (СТРОГО!)
-        if (vipStatus) {
-            if (balance >= 500000) {
-                vipStatus.innerText = "MEMBERSHIP: GOLDEN ELITE";
-                vipStatus.style.color = "#ffd700";
-            } else if (balance >= 100000) {
-                vipStatus.innerText = "MEMBERSHIP: SILVER PARTNER";
-                vipStatus.style.color = "#c0c0c0";
-            } else {
-                vipStatus.innerText = "MEMBERSHIP: START HUSTLER";
-                vipStatus.style.color = "#ffffff";
-            }
-        }
-
-        // баланс кабинета
         const profBal = document.getElementById('prof-balance');
-        if (profBal) profBal.innerText = balance.toLocaleString();
+        if (profBal) profBal.innerText = `${balance.toLocaleString()} LVC`;
 
-        updateBalanceUI();
+        this.syncProfileXP(balance);
     },
 
     saveRememberMeFromUser: function (user) {
@@ -115,12 +238,14 @@ window.AuthSystem = {
 
         try {
             localStorage.setItem(this._rememberKeys.userName, user.displayName || 'LEVIATHAN_BOSS');
-            if (user.photoURL) localStorage.setItem(this._rememberKeys.userPhoto, user.photoURL);
+            if (user.photoURL) {
+                localStorage.setItem(this._rememberKeys.userPhoto, user.photoURL);
+            } else {
+                localStorage.removeItem(this._rememberKeys.userPhoto);
+            }
 
-            // balance у нас и так живёт в localStorage, но продублируем
             localStorage.setItem(this._rememberKeys.balance, String(balance));
 
-            // подмена авы в хедере (сразу после входа)
             const headerFrameImg = document.getElementById('profile-avatar-img');
             const headerDefault = document.getElementById('profile-default-icon');
             const headerFrame = document.getElementById('profile-avatar-frame');
@@ -128,9 +253,13 @@ window.AuthSystem = {
             if (headerFrameImg && user.photoURL) {
                 headerFrameImg.src = user.photoURL;
                 headerFrameImg.style.display = 'block';
+                if (headerFrame) headerFrame.style.display = 'inline-flex';
+                if (headerDefault) headerDefault.style.display = 'none';
+            } else {
+                if (headerFrame) headerFrame.style.display = 'none';
+                if (headerFrameImg) headerFrameImg.style.display = 'none';
+                if (headerDefault) headerDefault.style.display = 'block';
             }
-            if (headerFrame) headerFrame.style.display = 'inline-flex';
-            if (headerDefault) headerDefault.style.display = 'none';
         } catch (e) {
             console.warn('RememberMe save failed:', e);
         }
@@ -149,31 +278,28 @@ window.AuthSystem = {
             const photo = localStorage.getItem(this._rememberKeys.userPhoto);
             const name = localStorage.getItem(this._rememberKeys.userName);
 
-            if (!photo) return false;
+            if (!name) return false;
 
-            // Подмена авы в хедере
             const headerFrameImg = document.getElementById('profile-avatar-img');
             const headerDefault = document.getElementById('profile-default-icon');
             const headerFrame = document.getElementById('profile-avatar-frame');
 
-            if (headerFrameImg) {
+            if (photo && headerFrameImg) {
                 headerFrameImg.src = photo;
                 headerFrameImg.style.display = 'block';
+                if (headerFrame) headerFrame.style.display = 'inline-flex';
+                if (headerDefault) headerDefault.style.display = 'none';
+            } else {
+                if (headerFrame) headerFrame.style.display = 'none';
+                if (headerDefault) headerDefault.style.display = 'block';
             }
-            if (headerFrame) headerFrame.style.display = 'inline-flex';
-            if (headerDefault) headerDefault.style.display = 'none';
 
-            // Имитация "авторизован" для отображения кабинки
             this.currentUser = {
                 displayName: name || 'LEVIATHAN_BOSS',
-                photoURL: photo
+                photoURL: photo || ''
             };
 
-            // обновим баланс UI (balance уже подхватили вверху файла)
             updateBalanceUI();
-
-            // открыть модалку сразу и показать профиль
-            this.openAuthOrProfile();
             return true;
         } catch (e) {
             console.warn('RememberMe boot failed:', e);
@@ -233,16 +359,29 @@ window.AuthSystem = {
     initAuthState: function () {
         const self = this;
         auth.onAuthStateChanged((user) => {
-            self.currentUser = user || null;
-
             if (user) {
+                self.currentUser = user;
                 self.saveRememberMeFromUser(user);
+            } else {
+                const name = localStorage.getItem(self._rememberKeys.userName);
+                if (name) {
+                    self.currentUser = {
+                        displayName: name,
+                        photoURL: localStorage.getItem(self._rememberKeys.userPhoto) || ''
+                    };
+                } else {
+                    self.currentUser = null;
+                }
             }
 
-            // если модалка открыта — обновляем экран
-            const modal = document.getElementById('auth-modal');
-            if (modal && modal.style.display === 'flex') {
+            const authModal = document.getElementById('auth-modal');
+            if (authModal && authModal.style.display === 'flex' && authModal.classList.contains('active')) {
                 self.openAuthOrProfile();
+            }
+
+            const profileModal = document.getElementById('profile-modal');
+            if (profileModal?.classList.contains('is-open')) {
+                self.syncProfile();
             }
 
             updateBalanceUI();
@@ -375,6 +514,13 @@ window.SlotMachine = {
             return;
         }
 
+        // apply graphics quality to animation speed (visual-only)
+        const graphicsQuality = localStorage.getItem('graphics_quality') || 'Ultra';
+        const turboEnabled = (localStorage.getItem('settings_turboSpins') || 'false') === 'true';
+
+        const baseDelay = (graphicsQuality === 'Low') ? 420 : (graphicsQuality === 'Medium' ? 360 : 320);
+        const speedMul = turboEnabled ? 0.65 : 1.0;
+
         this.isSpinning = true;
         balance -= 500; // Ставка
         updateBalanceUI();
@@ -384,6 +530,7 @@ window.SlotMachine = {
             document.getElementById('reel-1'),
             document.getElementById('reel-2')
         ];
+
 
         const results = [];
 
@@ -398,8 +545,9 @@ window.SlotMachine = {
                 if (results.length === 3) {
                     this.checkWin(results);
                 }
-            }, 500 + (index * 300)); // Задержка для эффекта
+            }, (baseDelay + (index * 200)) * speedMul); // Задержка для эффекта (graphics quality)
         });
+
     },
 
     checkWin: function(res) {
@@ -468,34 +616,171 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const profileModal = document.getElementById('profile-modal');
         if (e.target === profileModal) {
-            window.closeProfile?.();
-            profileModal.style.display = 'none';
+            AuthSystem.closeProfileWindow();
         }
     };
 
-    // ====== QUICK FIX: открыть Личный кабинет по клику на профиль в хедере ======
-    // Селектор кнопки профиля в index.html:
-    // <button class="btn-profile-icon" onclick="AuthSystem.openProfileWindow()"...>
-    const profileBtn = document.querySelector('button.btn-profile-icon') || document.getElementById('profile-avatar-frame');
-    const profileModal = document.getElementById('profile-modal');
-
-    if (profileBtn && profileModal) {
+    // Профиль: гость → SIGN UP, авторизован → личный кабинет
+    const profileBtn = document.querySelector('button.btn-profile-icon');
+    if (profileBtn) {
         profileBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-
-            profileModal.style.display = 'flex';
-            // если auth модалка открыта — выключаем
-            const authModal = document.getElementById('auth-modal');
-            if (authModal) authModal.style.display = 'none';
-
-            // синхронизируем данные (если текущий юзер известен)
-            try {
-                AuthSystem.syncProfile?.();
-            } catch (_) {}
+            AuthSystem.openAuthOrProfile();
         });
     }
 
+    const profileCloseBtn = document.getElementById('profile-close-btn');
+    if (profileCloseBtn) {
+        profileCloseBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            AuthSystem.closeProfileWindow();
+        });
+    }
+
+    const topUpBtn = document.getElementById('btn-topup');
+    if (topUpBtn) {
+        topUpBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            AuthSystem.openDepositFromCabinet();
+        });
+    }
+
+    const withdrawBtn = document.getElementById('btn-withdraw');
+    if (withdrawBtn) {
+        withdrawBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('Withdraw flow (demo)');
+        });
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') AuthSystem.closeProfileWindow();
+    });
+
+    // === PROMO under balance (gift icon toggles) ===
+    const PROMO_SECRET = 'Leviathan1488';
+    const PROMO_BONUS = 228;
+
+    const giftBtn = document.querySelector('.fa-gift')?.closest('button') || document.getElementById('promo-gift-btn');
+    const promoWrap = document.getElementById('promo-header-input');
+    const promoField = document.getElementById('promo-code-field');
+    const promoOkBtn = document.getElementById('promo-submit-btn');
+    let promoOpen = false;
+
+    const openPromoField = () => {
+        if (!promoWrap) return;
+        promoWrap.setAttribute('aria-hidden', 'false');
+        promoWrap.classList.remove('is-closing');
+        requestAnimationFrame(() => {
+            promoWrap.classList.add('is-open');
+        });
+        promoOpen = true;
+        if (giftBtn) giftBtn.classList.add('is-active');
+        if (promoField) {
+            promoField.value = '';
+            promoField.classList.remove('promo-error', 'promo-success');
+            setTimeout(() => promoField.focus(), 80);
+        }
+    };
+
+    const closePromoField = () => {
+        if (!promoWrap) return;
+        promoWrap.classList.remove('is-open');
+        promoWrap.classList.add('is-closing');
+        promoWrap.setAttribute('aria-hidden', 'true');
+        promoOpen = false;
+        if (giftBtn) giftBtn.classList.remove('is-active');
+        setTimeout(() => {
+            if (!promoOpen) {
+                promoWrap.classList.remove('is-closing');
+            }
+        }, 280);
+    };
+
+    const togglePromoField = () => {
+        if (promoOpen) closePromoField();
+        else openPromoField();
+    };
+
+    const showPromoError = () => {
+        if (!promoField) return;
+        promoField.classList.remove('promo-success');
+        promoField.classList.add('promo-error');
+        if (promoWrap) {
+            promoWrap.classList.remove('promo-shake');
+            void promoWrap.offsetWidth;
+            promoWrap.classList.add('promo-shake');
+            setTimeout(() => promoWrap.classList.remove('promo-shake'), 450);
+        }
+        setTimeout(() => promoField.classList.remove('promo-error'), 1200);
+    };
+
+    const applyPromo = () => {
+        const raw = (promoField?.value || '').trim();
+        if (!raw) {
+            showPromoError();
+            return;
+        }
+        if (raw.toLowerCase() !== PROMO_SECRET.toLowerCase()) {
+            showPromoError();
+            return;
+        }
+
+        balance += PROMO_BONUS;
+        updateBalanceUI();
+        try { AuthSystem.syncProfile?.(); } catch (_) {}
+
+        if (promoField) {
+            promoField.value = 'SUCCESS!';
+            promoField.classList.add('promo-success');
+            promoField.classList.remove('promo-error');
+        }
+        if (promoOkBtn) promoOkBtn.disabled = true;
+
+        setTimeout(() => {
+            closePromoField();
+            if (promoField) {
+                promoField.value = '';
+                promoField.classList.remove('promo-success', 'promo-error');
+            }
+            if (promoOkBtn) promoOkBtn.disabled = false;
+        }, 1500);
+    };
+
+    if (giftBtn && promoWrap && promoField && promoOkBtn) {
+        giftBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            togglePromoField();
+        });
+
+        promoOkBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            applyPromo();
+        });
+
+        promoField.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyPromo();
+            }
+        });
+
+        promoWrap.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+
+        document.addEventListener('click', () => {
+            if (promoOpen) closePromoField();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && promoOpen) closePromoField();
+        });
+    }
 });
 
 // 8. AI INTERFACE (LEVIATHAN AI)
@@ -565,54 +850,6 @@ try{
 /* Firebase auth-состояние:
    AuthSystem.initAuthState() сам переключит auth/profile экран внутри модалки */
 AuthSystem.initAuthState();
-
-/* === PROMO / GIFTS (left sidebar) === */
-const PROMO_CODE = 'Leviatha1488';
-const PROMO_REWARD = 228;
-
-window.openPromoModal = function () {
-    const modal = document.getElementById('promo-modal');
-    if (!modal) return;
-
-    const input = document.getElementById('promo-code-input');
-    if (input) input.value = '';
-
-    modal.style.display = 'flex';
-    input?.focus?.();
-};
-
-window.closePromoModal = function () {
-    const modal = document.getElementById('promo-modal');
-    if (!modal) return;
-    modal.style.display = 'none';
-};
-
-window.applyPromoCode = function () {
-    const input = document.getElementById('promo-code-input');
-    const raw = (input?.value || '').trim();
-    if (!raw) {
-        alert('Enter promo code, Boss!');
-        return;
-    }
-
-    if (raw !== PROMO_CODE) {
-        alert('Invalid promo code, Boss!');
-        return;
-    }
-
-    // начисляем награду
-    balance += PROMO_REWARD;
-    updateBalanceUI();
-
-    // опционально: отметим факт активации в localStorage, чтобы не спамили при повторных запросах
-    try {
-        localStorage.setItem(`promo_${PROMO_CODE}_used`, '1');
-    } catch (_) {}
-
-    alert(`Promo activated! +${PROMO_REWARD} LVC`);
-
-    closePromoModal();
-};
 
 // Ставим аватар в хедер (золотая рамка)
 auth.onAuthStateChanged((user) => {
@@ -948,19 +1185,12 @@ window.copyWallet = function() {
 };
 
 // ВОЗВРАЩАЕМ ВИТЮ НА БАЗУ
-window.openProfile = function() {
-    const modal = document.getElementById('profile-modal'); // Проверь ID в HTML!
-    if (modal) {
-        modal.style.display = 'flex';
-        console.log("Welcome back, Boss Vitya!");
-    } else {
-        console.error("Profile modal not found! Check ID in index.html");
-    }
+window.openProfile = function () {
+    AuthSystem.openProfileWindow();
 };
 
-window.closeProfile = function() {
-    const modal = document.getElementById('profile-modal');
-    if (modal) modal.style.display = 'none';
+window.closeProfile = function () {
+    AuthSystem.closeProfileWindow();
 };
 
 // Чтобы кнопка TERMINATE SESSION работала
@@ -974,3 +1204,273 @@ window.openAuth = function () {
     console.log("Leviathan: Открываю модальное окно профиля/входа...");
     AuthSystem.openAuthOrProfile();
 };
+
+/* === SETTINGS / SUPPORT MODALS (Leviathan UI) === */
+(function () {
+    const SETTINGS_MODAL_ID = 'settings-modal';
+    const SUPPORT_MODAL_ID = 'support-modal';
+
+    const LS_KEYS = {
+        sound: 'settings_soundEffects',
+        ambient: 'settings_ambientMusic',
+        turbo: 'settings_turboSpins',
+
+        // pro settings (gold matte) - streamer_mode is secret-only, so no UI binding/labels
+        graphicsQuality: 'graphics_quality',
+        autoSpinsLimit: 'auto_spins_limit',
+        selectedCurrency: 'selected_currency'
+    };
+
+    const defaultState = {
+        sound: true,
+        ambient: false,
+        turbo: false,
+
+        graphicsQuality: 'Ultra',
+        autoSpinsLimit: 'Infinite',
+        selectedCurrency: 'LVC'
+    };
+
+
+    function getEl(id) {
+        return document.getElementById(id);
+    }
+
+    function isAnyOpen() {
+        const s = getEl(SETTINGS_MODAL_ID);
+        const h = getEl(SUPPORT_MODAL_ID);
+        return (s && s.classList.contains('is-open')) || (h && h.classList.contains('is-open'));
+    }
+
+    function applyToggleVisual(inputEl, labelEl) {
+        const on = !!inputEl?.checked;
+        if (labelEl) labelEl.textContent = on ? 'ON' : 'OFF';
+    }
+
+    function setModalOpen(modalEl, open) {
+        if (!modalEl) return;
+
+        if (open) {
+            modalEl.style.display = 'flex';
+            modalEl.classList.remove('closing');
+            // старт анимации
+            // eslint-disable-next-line no-unused-expressions
+            void modalEl.offsetWidth;
+            modalEl.classList.add('is-open');
+        } else {
+            modalEl.classList.remove('is-open');
+            modalEl.classList.add('closing');
+            setTimeout(() => {
+                modalEl.classList.remove('closing');
+                modalEl.style.display = 'none';
+            }, 260);
+        }
+    }
+
+    function loadSettingsState() {
+        const readBool = (k, fallback) => {
+            const raw = localStorage.getItem(k);
+            if (raw === null) return fallback;
+            return raw === 'true';
+        };
+
+        const readStr = (k, fallback) => {
+            const raw = localStorage.getItem(k);
+            if (raw === null || raw === '') return fallback;
+            return raw;
+        };
+
+        return {
+            sound: readBool(LS_KEYS.sound, defaultState.sound),
+            ambient: readBool(LS_KEYS.ambient, defaultState.ambient),
+            turbo: readBool(LS_KEYS.turbo, defaultState.turbo),
+
+            graphicsQuality: readStr(LS_KEYS.graphicsQuality, defaultState.graphicsQuality),
+            autoSpinsLimit: readStr(LS_KEYS.autoSpinsLimit, defaultState.autoSpinsLimit),
+            selectedCurrency: readStr(LS_KEYS.selectedCurrency, defaultState.selectedCurrency)
+        };
+    }
+
+    function saveSettingsState(state) {
+        localStorage.setItem(LS_KEYS.sound, String(!!state.sound));
+        localStorage.setItem(LS_KEYS.ambient, String(!!state.ambient));
+        localStorage.setItem(LS_KEYS.turbo, String(!!state.turbo));
+
+        localStorage.setItem(LS_KEYS.graphicsQuality, String(state.graphicsQuality));
+        localStorage.setItem(LS_KEYS.autoSpinsLimit, String(state.autoSpinsLimit));
+        localStorage.setItem(LS_KEYS.selectedCurrency, String(state.selectedCurrency));
+    }
+
+
+    function syncSettingsUI(state) {
+        const soundInput = getEl('settings-sound');
+        const ambientInput = getEl('settings-ambient');
+        const turboInput = getEl('settings-turbo');
+
+        const soundLabel = getEl('settings-sound-label');
+        const ambientLabel = getEl('settings-ambient-label');
+        const turboLabel = getEl('settings-turbo-label');
+
+        const graphicsSelect = getEl('settings-graphics-quality');
+        const autoSpinsSelect = getEl('settings-auto-spins-limit');
+        const currencySelect = getEl('settings-selected-currency');
+
+        if (soundInput) soundInput.checked = !!state.sound;
+        if (ambientInput) ambientInput.checked = !!state.ambient;
+        if (turboInput) turboInput.checked = !!state.turbo;
+
+        if (soundInput) applyToggleVisual(soundInput, soundLabel);
+        if (ambientInput) applyToggleVisual(ambientInput, ambientLabel);
+        if (turboInput) applyToggleVisual(turboInput, turboLabel);
+
+        if (graphicsSelect) graphicsSelect.value = state.graphicsQuality;
+        if (autoSpinsSelect) autoSpinsSelect.value = state.autoSpinsLimit;
+        if (currencySelect) currencySelect.value = state.selectedCurrency;
+    }
+
+    function bindSettingsToggles() {
+        const soundInput = getEl('settings-sound');
+        const ambientInput = getEl('settings-ambient');
+        const turboInput = getEl('settings-turbo');
+
+        const soundLabel = getEl('settings-sound-label');
+        const ambientLabel = getEl('settings-ambient-label');
+        const turboLabel = getEl('settings-turbo-label');
+
+        const graphicsSelect = getEl('settings-graphics-quality');
+        const autoSpinsSelect = getEl('settings-auto-spins-limit');
+        const currencySelect = getEl('settings-selected-currency');
+
+        const state = loadSettingsState();
+        syncSettingsUI(state);
+
+        const update = (partial) => {
+            const next = { ...loadSettingsState(), ...partial };
+            saveSettingsState(next);
+            syncSettingsUI(next);
+            return next;
+        };
+
+        if (soundInput) {
+            soundInput.addEventListener('change', () => update({ sound: soundInput.checked }));
+            applyToggleVisual(soundInput, soundLabel);
+        }
+        if (ambientInput) {
+            ambientInput.addEventListener('change', () => update({ ambient: ambientInput.checked }));
+            applyToggleVisual(ambientInput, ambientLabel);
+        }
+        if (turboInput) {
+            turboInput.addEventListener('change', () => update({ turbo: turboInput.checked }));
+            applyToggleVisual(turboInput, turboLabel);
+        }
+
+        if (graphicsSelect) {
+            graphicsSelect.addEventListener('change', () => update({ graphicsQuality: graphicsSelect.value }));
+        }
+
+        if (autoSpinsSelect) {
+            autoSpinsSelect.addEventListener('change', () => update({ autoSpinsLimit: autoSpinsSelect.value }));
+        }
+
+        if (currencySelect) {
+            currencySelect.addEventListener('change', () => update({ selectedCurrency: currencySelect.value }));
+        }
+    }
+
+
+    window.openSettingsModal = function () {
+        const settings = getEl(SETTINGS_MODAL_ID);
+        const support = getEl(SUPPORT_MODAL_ID);
+
+        // close other if open
+        if (support && support.classList.contains('is-open')) setModalOpen(support, false);
+
+        // ensure css transition exists (no dependence on cos.css)
+        if (settings) {
+            settings.style.transition = 'opacity .25s ease, transform .25s ease, backdrop-filter .4s ease';
+            settings.style.opacity = '1';
+        }
+
+        bindSettingsToggles();
+        setModalOpen(settings, true);
+    };
+
+    window.closeSettingsModal = function () {
+        const settings = getEl(SETTINGS_MODAL_ID);
+        setModalOpen(settings, false);
+    };
+
+    window.openSupportModal = function () {
+        const settings = getEl(SETTINGS_MODAL_ID);
+        const support = getEl(SUPPORT_MODAL_ID);
+
+        if (settings && settings.classList.contains('is-open')) setModalOpen(settings, false);
+
+        if (support) {
+            support.style.transition = 'opacity .25s ease, transform .25s ease, backdrop-filter .4s ease';
+            support.style.opacity = '1';
+        }
+
+        setModalOpen(support, true);
+    };
+
+    window.closeSupportModal = function () {
+        const support = getEl(SUPPORT_MODAL_ID);
+        setModalOpen(support, false);
+    };
+
+    function ensureBackdropClose(modalId, closeFn) {
+        const modal = getEl(modalId);
+        if (!modal) return;
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeFn();
+        });
+    }
+
+    // Inject minimal animation CSS once
+    function injectModalAnimationCSS() {
+        if (document.getElementById('settings-support-modal-anim-style')) return;
+
+        const style = document.createElement('style');
+        style.id = 'settings-support-modal-anim-style';
+        style.textContent = `
+            #settings-modal, #support-modal {
+                opacity: 0;
+                transform: translateY(10px) scale(.98);
+                transition: opacity .25s ease, transform .25s ease, backdrop-filter .4s ease;
+                pointer-events: none;
+            }
+            #settings-modal.is-open, #support-modal.is-open {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                pointer-events: auto;
+            }
+            #settings-modal.closing, #support-modal.closing {
+                opacity: 0;
+                transform: translateY(10px) scale(.98);
+                pointer-events: none;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        injectModalAnimationCSS();
+
+        ensureBackdropClose(SETTINGS_MODAL_ID, window.closeSettingsModal);
+        ensureBackdropClose(SUPPORT_MODAL_ID, window.closeSupportModal);
+
+        // Safety: Escape closes whichever open
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            if (!isAnyOpen()) return;
+            if (getEl(SETTINGS_MODAL_ID)?.classList.contains('is-open')) window.closeSettingsModal();
+            else if (getEl(SUPPORT_MODAL_ID)?.classList.contains('is-open')) window.closeSupportModal();
+        });
+
+        // also bind initial defaults to avoid labels mismatch
+        bindSettingsToggles();
+    });
+})();
+
