@@ -72,10 +72,17 @@
                 </div>
             </div>
 
-            <div class="header-right" id="header-right" style="display:flex; align-items:center; justify-content:flex-end; gap:15px;">
-                <div class="wallet-real"> 50,000 LVC</div>
+            <div class="header-right" id="header-right">
+                <div class="header-wallet-col">
+                    <div class="wallet-real" id="balance-amount">50,000 LVC</div>
+                    <div id="promo-header-input" class="promo-header-input" aria-hidden="true">
+                        <input type="text" id="promo-code-field" class="promo-code-field" placeholder="PROMO CODE" autocomplete="off" spellcheck="false">
+                        <button type="button" id="promo-submit-btn" class="promo-submit-btn">OK</button>
+                    </div>
+                </div>
+
 <button class="btn-deposit-top" onclick="document.getElementById('deposit-modal').style.display='flex'" type="button">DEPOSIT</button>
-<button class="btn-profile-icon" onclick="AuthSystem.openProfileWindow()" type="button" aria-label="Profile" title="Profile" style="border:none; background: transparent; padding:0; display:flex; align-items:center; justify-content:center;">
+<button class="btn-profile-icon" type="button" aria-label="Profile" title="Profile" style="border:none; background: transparent; padding:0; display:flex; align-items:center; justify-content:center;">
     <span id="profile-avatar-frame" style="display:none; width:34px; height:34px; border-radius:50%; padding:2px; background: linear-gradient(135deg, rgba(255,215,0,0.95), rgba(184,134,11,0.85), rgba(255,215,0,0.95)); box-shadow: 0 0 18px rgba(255,215,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.08);">
         <img id="profile-avatar-img" alt="User avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; background: rgba(0,0,0,0.35);" />
     </span>
@@ -174,9 +181,13 @@
 
                 <!-- STEALTH SETTINGS ACCESS -->
                 <div class="side-bottom-icons" style="padding: 20px; display: flex; justify-content: space-around; border-top: 1px solid rgba(255,255,255,0.03);">
-                    <button title="Support" style="background:none; border:none; color:#555; cursor:pointer;"><i class="fas fa-question-circle"></i></button>
-                    <button title="Gifts" style="background:none; border:none; color:#555; cursor:pointer;" onclick="openPromoModal()"><i class="fas fa-gift"></i></button>
-                    <button id="settings-trigger-side" onclick="document.getElementById('settings-modal').style.display='flex'" onmouseover="this.style.color='#ffd700'" onmouseout="this.style.color='#555'" title="Settings" style="background:none; border:none; color:#555; cursor:pointer;"><i class="fas fa-cog"></i></button>
+                    <button id="support-trigger-side" type="button" title="Support" style="background:none; border:none; color:#555; cursor:pointer;" onclick="openSupportModal()">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
+                    <button type="button" id="promo-gift-btn" title="Gifts" class="side-icon-btn" aria-label="Promo code"><i class="fas fa-gift"></i></button>
+                    <button id="settings-trigger-side" type="button" onmouseover="this.style.color='#ffd700'" onmouseout="this.style.color='#555'" title="Settings" style="background:none; border:none; color:#555; cursor:pointer;" onclick="openSettingsModal()">
+                        <i class="fas fa-cog"></i>
+                    </button>
                 </div>
             </aside>
 
@@ -340,111 +351,88 @@
         </div>
     </div>
 
-    <div id="auth-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center;">
-        <div class="auth-pop auth-glass-card" style="max-width: 420px; width: 400px; background: rgba(255,255,255,0.02); padding: 14px 16px 10px; box-shadow: 0 0 0 1px rgba(255,215,0,0.45), 0 0 35px rgba(255,215,0,0.18); backdrop-filter: blur(15px); overflow: hidden;">
-            <!-- AUTH VIEW (Гость) -->
-            <div id="auth-container">
-                <!-- REGISTRATION (only) -->
-                <div id="auth-panel-signup">
-                    <div class="auth-title">SIGN UP</div>
-                    <div class="auth-subtitle">LIQUID GLASS REGISTRATION</div>
-                    <div class="gold-divider"></div>
+    <div id="auth-modal" class="auth-modal-overlay" style="display:none;">
+        <div class="auth-pop liquid-signup-card">
+            <button type="button" class="liquid-signup-close" onclick="closeAuth()" aria-label="Close">&times;</button>
+            <div id="auth-panel-signup" class="liquid-signup-inner">
+                <h2 class="liquid-signup-title">SIGN UP</h2>
+                <p class="liquid-signup-subtitle">LIQUID GLASS REGISTRATION</p>
+                <div class="gold-divider"></div>
 
-                    <div style="margin-bottom:14px;">
-                        <label class="auth-label" for="auth-signup-username">USERNAME</label>
-                        <input id="auth-signup-username" class="auth-input" type="text" placeholder="Create username" autocomplete="username" />
-                    </div>
-                    <div style="margin-bottom:10px;">
-                        <label class="auth-label" for="auth-signup-password">PASSWORD</label>
-                        <input id="auth-signup-password" class="auth-input" type="password" placeholder="Create password" autocomplete="new-password" />
-                    </div>
+                <div class="liquid-signup-field">
+                    <label class="liquid-signup-label" for="auth-signup-username">USERNAME</label>
+                    <input id="auth-signup-username" class="liquid-signup-input" type="text" placeholder="Create username" autocomplete="username">
+                </div>
 
-                    <button class="gold-btn-premium" onclick="handleRegister()">CREATE ACCOUNT</button>
+                <div class="liquid-signup-field">
+                    <label class="liquid-signup-label" for="auth-signup-password">PASSWORD</label>
+                    <input id="auth-signup-password" class="liquid-signup-input" type="password" placeholder="Create password" autocomplete="new-password">
+                </div>
 
-                    <div class="social-grid" style="display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:nowrap;">
-                        <div class="social-btn" role="button" tabindex="0" onclick="AuthSystem.loginWith('google')" onkeydown="if(event.key==='Enter') AuthSystem.loginWith('google')">
-                            <i class="fab fa-google social-icon" aria-hidden="true"></i>
-                            <span class="social-text">Google</span>
-                        </div>
+                <button type="button" class="liquid-signup-submit" onclick="handleRegister()">CREATE ACCOUNT</button>
 
-                        <div class="social-btn" role="button" tabindex="0" onclick="handleSocialLogin('apple')" onkeydown="if(event.key==='Enter') handleSocialLogin('apple')">
-                            <i class="fab fa-apple social-icon" aria-hidden="true"></i>
-                            <span class="social-text">Apple</span>
-                        </div>
+                <div class="liquid-signup-social">
+                    <button type="button" class="liquid-social-btn" onclick="AuthSystem.loginWith('google')" aria-label="Google">
+                        <i class="fab fa-google" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="liquid-social-btn" onclick="handleSocialLogin('apple')" aria-label="Apple">
+                        <i class="fab fa-apple" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="liquid-social-btn" onclick="handleSocialLogin('telegram')" aria-label="Telegram">
+                        <i class="fab fa-telegram-plane" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="liquid-social-btn" onclick="handleSocialLogin('facebook')" aria-label="Facebook">
+                        <i class="fab fa-facebook-f" aria-hidden="true"></i>
+                    </button>
+                </div>
 
-                        <!-- Telegram Login Widget (бот @LeviathanAuthBot) -->
-                        <div class="social-btn" role="button" tabindex="0" style="padding:0; overflow:hidden;">
-                            <div
-                                id="telegram-login-widget"
-                                style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; gap:10px;"
-                                data-telegram-login="LeviathanAuthBot"
-                                data-size="large"
-                                data-radius="16"
-                                data-userpic="true"
-                                data-auth-url="https://example.com/telegram/auth"
-                                aria-label="Login with Telegram"
-                            >
-                                <i class="fab fa-telegram-plane social-icon" aria-hidden="true" style="font-size:1.1rem;"></i>
-                                <span class="social-text">Telegram</span>
-                            </div>
-                        </div>
-
-                        <div class="social-btn" role="button" tabindex="0" onclick="handleSocialLogin('facebook')" onkeydown="if(event.key==='Enter') handleSocialLogin('facebook')">
-                            <i class="fab fa-facebook-f social-icon" aria-hidden="true"></i>
-                            <span class="social-text">Facebook</span>
-                        </div>
-                    </div>
-
-                    <div style="margin-top:14px; padding:14px 14px; border-radius:16px; border:1px solid rgba(255,215,0,0.25); background: radial-gradient(circle at 20% 0%, rgba(255,215,0,0.18), rgba(0,0,0,0) 55%), rgba(255,255,255,0.02); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);">
-                        <div style="color: rgba(255,255,255,0.78); font-size:12px; font-weight:900; letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; text-align:center;">
-                            M A T T E • A U R A • G O L D
-                        </div>
-                        <div style="color: rgba(255,255,255,0.50); font-size:12px; text-align:center;">
-                            Smooth liquid glass onboarding (demo UI)
-                        </div>
-                    </div>
+                <div class="liquid-signup-footer">
+                    <div class="liquid-signup-footer-title">MATTE • AURA • GOLD</div>
+                    <div class="liquid-signup-footer-sub">Smooth liquid glass onboarding (demo UI)</div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- PROFILE MODAL: Личный кабинет (850px) -->
-    <div id="profile-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.82); z-index:1200; align-items:center; justify-content:center;">
-        <div class="liquid-gold-cabinet-wrap" style="margin:0; width:850px; max-width: calc(100vw - 24px); animation: lgcWrapIn 0.65s cubic-bezier(.16,1,.3,1) both;">
-            <div class="liquid-gold-cabinet" id="user-cabinet" style="max-width:none; margin:0; border-radius:28px; padding:0; width:100%; grid-template-columns: 0.9fr 1.1fr; gap:0;">
+    <div id="profile-modal" class="profile-modal-overlay" style="display:none;">
+        <div class="liquid-gold-cabinet-wrap profile-modal-panel">
+            <button type="button" class="profile-modal-close" id="profile-close-btn" onclick="AuthSystem.closeProfileWindow()" aria-label="Close profile">&times;</button>
+            <div class="liquid-gold-cabinet" id="user-cabinet">
                 <!-- left column: profile -->
-                <div class="lgc-card-glass lgc-profile" style="padding:22px 18px; border-radius:28px 0 0 28px; border-right: 1px solid rgba(255,215,0,0.14);">
-                    <div class="lgc-avatar-frame" style="margin-top:0;">
-                        <img id="user-big-avatar" alt="User avatar" class="lgc-avatar-img" src="" style="display:block;" />
+                <div class="lgc-card-glass lgc-profile">
+                    <div class="lgc-avatar-frame">
+                        <img id="user-big-avatar" alt="User avatar" class="lgc-avatar-img" src="" style="display:none;">
+                        <div id="user-avatar-fallback" class="lgc-avatar-fallback" aria-hidden="true"><i class="fas fa-user"></i></div>
                     </div>
-                    <div class="lgc-nick" id="user-display-name" style="font-size:1.15rem; margin-top:10px;">Витя</div>
-                    <div class="lgc-tagline" id="user-vip-status">VIP • GOLD</div>
+                    <div class="lgc-nick" id="user-display-name">LEVIATHAN_BOSS</div>
+                    <div class="lgc-tagline" id="user-vip-status">VIP • BRONZE</div>
                 </div>
 
                 <!-- right column: finances + xp -->
-                <div class="lgc-card-glass lgc-center" style="padding:24px 22px; border-radius:0 28px 28px 0;">
-                    <div class="lgc-balance-block" style="background: rgba(255,255,255,0.02); border-radius:22px;">
+                <div class="lgc-card-glass lgc-center">
+                    <div class="lgc-balance-block">
                         <div class="lgc-balance-title">
                             <span>Balance</span>
                         </div>
 
-                        <div class="lgc-balance-value" id="prof-balance" style="margin: 6px 0 10px; font-size: 2.65rem;">50 000 LVC</div>
+                        <div class="lgc-balance-value" id="prof-balance">50,000 LVC</div>
 
-                        <div class="lgc-actions" style="margin-top: 12px; flex-wrap: nowrap;">
-                            <button class="lgc-btn lgc-btn-deposit" id="btn-topup" type="button" onclick="document.getElementById('deposit-modal').style.display='flex'">TOP UP</button>
-                            <button class="lgc-btn lgc-btn-withdraw" id="btn-withdraw" type="button" onclick="alert('Withdraw flow (demo)')">WITHDRAW</button>
+                        <div class="lgc-actions">
+                            <button class="lgc-btn lgc-btn-deposit" id="btn-topup" type="button">TOP UP</button>
+                            <button class="lgc-btn lgc-btn-withdraw" id="btn-withdraw" type="button">WITHDRAW</button>
                         </div>
                     </div>
 
-                    <div class="lgc-xp-block" style="margin-top:16px; padding: 14px 14px;">
+                    <div class="lgc-xp-block">
                         <div class="lgc-xp-top">
                             <div>
                                 <div class="lvl-current">XP</div>
                             </div>
-                            <div class="lvl-next" id="xp-meta">Level 7</div>
+                            <div class="lvl-next" id="xp-meta">Level 1</div>
                         </div>
-                        <div class="lgc-xp-bar" style="width:100%;">
-                            <div class="lgc-xp-fill" id="xp-fill" style="width:38%;"></div>
+                        <div class="lgc-xp-bar">
+                            <div class="lgc-xp-fill" id="xp-fill" style="width:0%;"></div>
                         </div>
                         <div class="lgc-xp-ticks">
                             <span class="active" id="xp-tick-1">0</span>
@@ -459,33 +447,129 @@
         </div>
     </div>
 
-    <!-- PROMO MODAL: GIFTS (PROMOCODES) -->
-    <div id="promo-modal" class="modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center;">
-        <div class="auth-pop auth-glass-card" style="max-width: 420px; width: 420px; background: rgba(255,255,255,0.02); padding: 16px 16px 14px; box-shadow: 0 0 0 1px rgba(255,215,0,0.45), 0 0 35px rgba(255,215,0,0.18); backdrop-filter: blur(15px); border-radius: 16px;">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom: 10px;">
-                <div style="color:#ffd700; font-family:'Syncopate'; font-weight:900; letter-spacing:3px; font-size:12px;">PROMOCODE</div>
-                <button onclick="closePromoModal()" style="background:none; border:none; color:#ffd700; cursor:pointer; font-size:1.2rem;">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <div style="margin-bottom: 12px; color: rgba(255,255,255,0.65); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; font-weight: 900;">
-                Enter your gift code
-            </div>
-
-            <div style="margin-bottom: 12px;">
-                <label for="promo-code-input" style="display:block; color: rgba(255,255,255,0.55); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; font-weight: 900; margin-bottom: 6px;">
-                    CODE
-                </label>
-                <input id="promo-code-input" type="text" placeholder="e.g. Leviatha1488" style="width:100%; background:none; border:none; border-bottom: 1px solid rgba(255,215,0,0.3); color:#fff; padding: 10px 0; font-family:'Space Grotesk'; font-weight:900; outline:none; letter-spacing: 2px;">
-            </div>
-
-            <button onclick="applyPromoCode()" style="width:100%; background: linear-gradient(135deg, #ffd700 0%, #b8860b 100%); color:#000; border:none; border-radius:12px; padding: 14px; cursor:pointer; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; box-shadow: 0 10px 30px rgba(184,134,11,0.3);">
-                APPLY
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="modal-overlay settings-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.86); z-index:240000; backdrop-filter: blur(18px);">
+        <div class="settings-modal-panel" style="width: 100%; max-width: 640px; margin: 50px auto; position: relative; padding: 35px 30px 25px; border-radius: 22px; background: rgba(10,10,10,0.72); border: 1px solid rgba(255,215,0,0.35); box-shadow: 0 0 40px rgba(255,215,0,0.08);">
+            <button type="button" class="settings-modal-close" aria-label="Close settings" onclick="closeSettingsModal()" style="position:absolute; top:18px; right:18px; background:none; border:none; color:#ffd700; cursor:pointer; font-size:1.5rem; z-index:10;">
+                <i class="fas fa-times"></i>
             </button>
 
-            <div style="margin-top: 10px; color: rgba(255,255,255,0.45); font-size: 10px; line-height: 1.4;">
-                Promo codes are available only from the Gifts icon.
+            <div style="text-align:center; margin-bottom: 22px;">
+                <div style="font-family:'Syncopate'; font-weight:900; letter-spacing: 6px; color:#ffd700; font-size: 1.15rem;">SETTINGS</div>
+                <div style="height:1px; background: rgba(255,215,0,0.22); margin: 12px auto 0; max-width: 420px;"></div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap: 14px; padding: 0 8px; margin-bottom: 26px;">
+                <label class="settings-switch-row" style="display:flex; align-items:center; justify-content:space-between; gap: 16px; cursor:pointer; padding: 14px 16px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+                    <div>
+                        <div style="font-weight:900; letter-spacing:1px; color:#fff; font-size: 0.95rem;">Sound Effects</div>
+                        <div style="opacity:0.45; font-size: 0.78rem; margin-top: 3px;">SFX audio feedback</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap: 12px;">
+                        <span style="color:#ffd700; font-weight:900; font-size: 0.85rem;" id="settings-sound-label">ON</span>
+                        <input id="settings-sound" type="checkbox" checked style="width: 1px; height:1px; opacity:0; position:absolute;">
+                        <span class="settings-switch-ui" aria-hidden="true" style="width: 52px; height: 28px; border-radius: 999px; background: rgba(255,215,0,0.22); border: 1px solid rgba(255,215,0,0.35); position: relative; transition: 0.25s ease; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);">
+                            <span class="settings-switch-knob" style="position:absolute; top:50%; transform: translateY(-50%); left: 4px; width: 20px; height: 20px; border-radius:50%; background: linear-gradient(135deg, rgba(255,215,0,0.95), rgba(184,134,11,0.95)); box-shadow: 0 0 18px rgba(255,215,0,0.25); transition: 0.25s ease;"></span>
+                        </span>
+                    </div>
+                </label>
+
+                <label class="settings-switch-row" style="display:flex; align-items:center; justify-content:space-between; gap: 16px; cursor:pointer; padding: 14px 16px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+                    <div>
+                        <div style="font-weight:900; letter-spacing:1px; color:#fff; font-size: 0.95rem;">Ambient Music</div>
+                        <div style="opacity:0.45; font-size: 0.78rem; margin-top: 3px;">Soft background tracks</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap: 12px;">
+                        <span style="color:#ffd700; font-weight:900; font-size: 0.85rem;" id="settings-ambient-label">OFF</span>
+                        <input id="settings-ambient" type="checkbox" style="width: 1px; height:1px; opacity:0; position:absolute;">
+                        <span class="settings-switch-ui" aria-hidden="true" style="width: 52px; height: 28px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); position: relative; transition: 0.25s ease; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);">
+                            <span class="settings-switch-knob" style="position:absolute; top:50%; transform: translateY(-50%); left: 4px; width: 20px; height: 20px; border-radius:50%; background: linear-gradient(135deg, rgba(210,210,210,0.85), rgba(120,120,120,0.85)); box-shadow: 0 0 10px rgba(255,255,255,0.08); transition: 0.25s ease;"></span>
+                        </span>
+                    </div>
+                </label>
+
+                <label class="settings-switch-row" style="display:flex; align-items:center; justify-content:space-between; gap: 16px; cursor:pointer; padding: 14px 16px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+                    <div>
+                        <div style="font-weight:900; letter-spacing:1px; color:#fff; font-size: 0.95rem;">Turbo Spins</div>
+                        <div style="opacity:0.45; font-size: 0.78rem; margin-top: 3px;">Faster reel animations</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap: 12px;">
+                        <span style="color:#ffd700; font-weight:900; font-size: 0.85rem;" id="settings-turbo-label">OFF</span>
+                        <input id="settings-turbo" type="checkbox" style="width: 1px; height:1px; opacity:0; position:absolute;">
+                        <span class="settings-switch-ui" aria-hidden="true" style="width: 52px; height: 28px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); position: relative; transition: 0.25s ease; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);">
+                            <span class="settings-switch-knob" style="position:absolute; top:50%; transform: translateY(-50%); left: 4px; width: 20px; height: 20px; border-radius:50%; background: linear-gradient(135deg, rgba(210,210,210,0.85), rgba(120,120,120,0.85)); box-shadow: 0 0 10px rgba(255,255,255,0.08); transition: 0.25s ease;"></span>
+                        </span>
+                    </div>
+                </label>
+
+
+                <div style="padding: 14px 16px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap: 16px;">
+                        <div>
+                            <div style="font-weight:900; letter-spacing:1px; color:#fff; font-size: 0.95rem;">Graphics Quality</div>
+                            <div style="opacity:0.45; font-size: 0.78rem; margin-top: 3px;">Low / Medium / Ultra</div>
+                        </div>
+                        <select id="settings-graphics-quality" style="appearance:none; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,215,0,0.25); color:#fff; padding: 10px 14px; border-radius: 12px; font-weight: 900; letter-spacing: 1px; font-family: 'Space Grotesk'; cursor:pointer; outline:none;">
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Ultra">Ultra</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="padding: 14px 16px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap: 16px;">
+                        <div>
+                            <div style="font-weight:900; letter-spacing:1px; color:#fff; font-size: 0.95rem;">Auto-Spins Limit</div>
+                            <div style="opacity:0.45; font-size: 0.78rem; margin-top: 3px;">10 / 25 / 50 / Infinite</div>
+                        </div>
+                        <select id="settings-auto-spins-limit" style="appearance:none; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,215,0,0.25); color:#fff; padding: 10px 14px; border-radius: 12px; font-weight: 900; letter-spacing: 1px; font-family: 'Space Grotesk'; cursor:pointer; outline:none;">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="Infinite">Infinite</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="padding: 14px 16px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap: 16px;">
+                        <div>
+                            <div style="font-weight:900; letter-spacing:1px; color:#fff; font-size: 0.95rem;">Currency Display</div>
+                            <div style="opacity:0.45; font-size: 0.78rem; margin-top: 3px;">LVC / USD / RUB</div>
+                        </div>
+                        <select id="settings-selected-currency" style="appearance:none; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,215,0,0.25); color:#fff; padding: 10px 14px; border-radius: 12px; font-weight: 900; letter-spacing: 1px; font-family: 'Space Grotesk'; cursor:pointer; outline:none;">
+                            <option value="LVC">LVC (Tokens)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="RUB">RUB (₽)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+
+            <div style="display:flex; justify-content:center;">
+                <button type="button" onclick="closeSettingsModal()" style="background: linear-gradient(135deg, #ffd700, #b8860b); color:#000; border:none; padding: 14px 58px; border-radius: 14px; cursor:pointer; font-weight:900; letter-spacing:2px; box-shadow: 0 10px 30px rgba(184,134,11,0.25);">
+                    SAVE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUPPORT MODAL -->
+    <div id="support-modal" class="modal-overlay support-modal-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.86); z-index:239000; backdrop-filter: blur(18px);">
+        <div class="support-modal-panel" style="width: 100%; max-width: 720px; margin: 50px auto; position: relative; padding: 35px 30px 25px; border-radius: 22px; background: rgba(10,10,10,0.72); border: 1px solid rgba(255,215,0,0.25); box-shadow: 0 0 40px rgba(255,215,0,0.07);">
+            <button type="button" class="support-modal-close" aria-label="Close support" onclick="closeSupportModal()" style="position:absolute; top:18px; right:18px; background:none; border:none; color:#ffd700; cursor:pointer; font-size:1.5rem; z-index:10;">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div style="text-align:center; margin-bottom: 18px;">
+                <div style="font-family:'Syncopate'; font-weight:900; letter-spacing: 6px; color:#ffd700; font-size: 1.15rem;">LEVIATHAN SUPPORT</div>
+                <div style="height:1px; background: rgba(255,215,0,0.22); margin: 12px auto 0; max-width: 520px;"></div>
+            </div>
+
+            <div style="padding: 0 8px; color: rgba(255,255,255,0.82); font-size: 0.95rem; line-height: 1.45; text-align:center;">
+                <em>Our neural network 'Leviathan AI' monitors your game 24/7. If you have any questions, just use the AI Chat widget on the right side of the screen! Or contact master: @Vito-call-ur</em>
             </div>
         </div>
     </div>
@@ -623,7 +707,7 @@
             if (profileModal) {
                 profileModal.addEventListener('click', function(e) {
                     if (e.target === profileModal) {
-                        profileModal.style.display = 'none';
+                        AuthSystem.closeProfileWindow();
                     }
                 });
             }
@@ -643,7 +727,7 @@
         }
 
         function handleRegister(){
-            alert('Leviathan AI: Register (в разработке).');
+            AuthSystem.registerLocalUser();
         }
     </script>
 
