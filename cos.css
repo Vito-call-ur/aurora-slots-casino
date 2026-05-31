@@ -89,6 +89,7 @@ body {
     padding: 0 20px;
     border-bottom: 1px solid #232328;
     z-index: 1000;
+    overflow: visible;
 }
 
 .header-left { display: flex; align-items: center; gap: 20px; }
@@ -110,7 +111,19 @@ body {
     background: transparent; border: none; color: #fff; width: 100%; outline: none; font-size: 0.9rem;
 }
 
-.header-right { display: flex; align-items: center; gap: 15px; }
+.header-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 15px;
+    overflow: visible;
+}
+
+.header-wallet-col {
+    position: relative;
+    flex-shrink: 0;
+}
+
 .wallet-real {
     background: #111;
     padding: 8px 15px;
@@ -118,8 +131,130 @@ body {
     border: 1px solid var(--gold);
     color: var(--gold);
     font-weight: 700;
+    white-space: nowrap;
+    text-align: center;
+    box-sizing: border-box;
 }
 .wallet-real small { color: #888; font-size: 0.7rem; margin-left: 5px; }
+
+/* Promo — выпадает из-под баланса, не сдвигая шапку */
+.promo-header-input {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-sizing: border-box;
+    z-index: 1101;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s ease;
+}
+
+.promo-header-input.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.promo-header-input.is-closing {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    pointer-events: none;
+}
+
+.promo-code-field {
+    flex: 1;
+    min-width: 0;
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    background: rgba(12, 12, 14, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #f5f5f5;
+    font-family: 'Space Grotesk', 'Montserrat', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-align: center;
+    text-transform: uppercase;
+    outline: none;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+
+.promo-code-field::placeholder {
+    color: rgba(255, 215, 0, 0.4);
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+}
+
+.promo-code-field:focus {
+    border-color: rgba(255, 215, 0, 0.75);
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.12);
+}
+
+.promo-code-field.promo-error {
+    border-color: #ff4d4d;
+    box-shadow: 0 0 0 2px rgba(255, 77, 77, 0.2);
+}
+
+.promo-code-field.promo-success {
+    border-color: #00ffcc;
+    color: #00ffcc;
+}
+
+.promo-submit-btn {
+    flex-shrink: 0;
+    height: 30px;
+    min-width: 36px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: #0e0e10;
+    background: linear-gradient(135deg, #ffe566 0%, #ffd700 45%, #b8860b 100%);
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    transition: transform 0.15s ease, filter 0.15s ease, opacity 0.2s ease;
+}
+
+.promo-submit-btn:hover:not(:disabled) {
+    filter: brightness(1.08);
+}
+
+.promo-submit-btn:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+@keyframes promo-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+}
+
+.promo-header-input.promo-shake .promo-code-field {
+    animation: promo-shake 0.45s ease;
+}
+
+.side-bottom-icons #promo-gift-btn.is-active {
+    color: var(--gold);
+}
 
 .btn-deposit-top {
     background: var(--gradient-joy);
@@ -553,6 +688,61 @@ body {
    чтобы при переходе мыши с текста на иконку/элементы не происходил "дрожащий" перезапуск. */
 .category-card * {
     pointer-events: none !important;
+}
+
+/* =========================
+   SETTINGS TOGGLES (Gold neon ON state)
+   ========================= */
+
+/* smooth motion + glow for the switch UI */
+#settings-sound,
+#settings-ambient,
+#settings-turbo {
+    /* inputs are visually hidden in HTML */
+}
+
+/* label default muted (spin.js toggles .is-on) */
+#settings-sound-label,
+#settings-ambient-label,
+#settings-turbo-label {
+    color: rgba(255, 255, 255, 0.35) !important;
+    opacity: 0.65;
+    font-weight: 900;
+    transition: all 0.3s ease;
+}
+
+#settings-sound-label.is-on,
+#settings-ambient-label.is-on,
+#settings-turbo-label.is-on {
+    color: #ffd700 !important;
+    opacity: 1;
+    text-shadow: 0 0 12px rgba(255, 215, 0, 0.35);
+    filter: brightness(1.15);
+}
+
+/* Switch background when checked */
+#settings-sound:checked ~ .settings-switch-ui,
+#settings-ambient:checked ~ .settings-switch-ui,
+#settings-turbo:checked ~ .settings-switch-ui {
+    background: linear-gradient(135deg, #ffd700, #b8860b) !important;
+    border: 1px solid rgba(255, 215, 0, 0.55) !important;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5) !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Knob slide + glow when checked */
+#settings-sound:checked ~ .settings-switch-ui .settings-switch-knob,
+#settings-ambient:checked ~ .settings-switch-ui .settings-switch-knob,
+#settings-turbo:checked ~ .settings-switch-ui .settings-switch-knob {
+    transform: translateX(24px) !important; /* плавное смещение вправо (Y остаётся как было) */
+    box-shadow: 0 0 18px rgba(255, 215, 0, 0.35) !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Ensure the knob and UI have transitions even before checked (prevents instant jumps) */
+.settings-switch-ui,
+.settings-switch-knob {
+    transition: all 0.3s ease !important;
 }
 
 /* Плавные переходы для карточек категорий */
@@ -1319,24 +1509,29 @@ body {
 
     font-size: 1.1rem;
     cursor: pointer;
+
     transition: all 0.2s ease-in-out;
     transform: translateY(0) scale(1);
 }
 
-/* Hover effect for all 3 bottom icons */
 .side-bottom-icons button:hover {
-    color: var(--gold) !important; /* #ffd700 */
+    color: #ffd700 !important;
     transform: translateY(-3px) scale(1.1);
     filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.35));
 }
 
-/* Settings gear: оставляем точечную подсветку под i, но синхронизируем с общим hover */
+/* Settings gear: делаем hover в едином стиле с остальными */
 #settings-trigger-side i {
     color: #555 !important;
-    transition: color 0.2s ease, filter 0.2s ease;
+    cursor: pointer;
+
+    transition: all 0.2s ease-in-out;
+    transform: translateY(0) scale(1);
 }
+
 #settings-trigger-side:hover i {
-    color: var(--gold) !important;
+    color: #ffd700 !important;
+    transform: translateY(-3px) scale(1.1);
     filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.35));
 }
 
@@ -2017,6 +2212,205 @@ body {
 .auth-hint a:hover{ text-decoration:underline; }
 
 /* =========================
+   LIQUID GLASS SIGN UP (как на макете)
+   ========================= */
+.auth-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.82);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.liquid-signup-card {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    padding: 28px 26px 22px;
+    border-radius: 18px;
+    border: 1px solid rgba(255, 215, 0, 0.42);
+    background:
+        radial-gradient(ellipse 120% 80% at 50% -20%, rgba(255, 215, 0, 0.08), transparent 55%),
+        linear-gradient(180deg, #141416 0%, #0c0c0e 100%);
+    box-shadow:
+        0 0 0 1px rgba(255, 215, 0, 0.12) inset,
+        0 24px 60px rgba(0, 0, 0, 0.65),
+        0 0 40px rgba(255, 215, 0, 0.08);
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.liquid-signup-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    border: none;
+    background: none;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    padding: 4px 8px;
+}
+
+.liquid-signup-close:hover {
+    color: #fff;
+}
+
+.liquid-signup-title {
+    margin: 0 0 8px;
+    font-family: 'Montserrat', 'Space Grotesk', sans-serif;
+    font-size: 1.65rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #fff;
+}
+
+.liquid-signup-subtitle {
+    margin: 0 0 14px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.liquid-signup-field {
+    margin-bottom: 14px;
+    text-align: center;
+}
+
+.liquid-signup-label {
+    display: block;
+    margin: 0 0 8px;
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.liquid-signup-input {
+    width: 100%;
+    box-sizing: border-box;
+    height: 46px;
+    padding: 0 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 215, 0, 0.32);
+    background: rgba(0, 0, 0, 0.35);
+    color: #fff;
+    font-family: 'Space Grotesk', 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.liquid-signup-input::placeholder {
+    color: rgba(255, 255, 255, 0.38);
+}
+
+.liquid-signup-input:focus {
+    border-color: rgba(255, 215, 0, 0.65);
+    box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+}
+
+.liquid-signup-submit {
+    width: 100%;
+    margin-top: 4px;
+    padding: 15px 16px;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #1a1a1a;
+    background: linear-gradient(180deg, #fff9c4 0%, #ffe566 35%, #ffd700 70%, #e6b800 100%);
+    box-shadow:
+        0 10px 28px rgba(255, 215, 0, 0.35),
+        0 0 24px rgba(255, 215, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.liquid-signup-submit:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+    box-shadow:
+        0 14px 34px rgba(255, 215, 0, 0.42),
+        0 0 30px rgba(255, 215, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.liquid-signup-social {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.liquid-social-btn {
+    flex: 1;
+    max-width: 72px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 215, 0, 0.28);
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.liquid-social-btn i {
+    font-size: 1.15rem;
+    line-height: 1;
+}
+
+.liquid-social-btn:hover {
+    border-color: rgba(255, 215, 0, 0.55);
+    background: rgba(255, 215, 0, 0.06);
+    transform: translateY(-2px);
+}
+
+.liquid-signup-footer {
+    margin-top: 18px;
+    padding: 16px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.22) 0%, rgba(184, 134, 11, 0.35) 50%, rgba(255, 215, 0, 0.18) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.liquid-signup-footer-title {
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.92);
+    margin-bottom: 6px;
+}
+
+.liquid-signup-footer-sub {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.35;
+}
+
+/* =========================
    LIQUID GOLD GLASS
    Личный Кабинет (VIP)
    ========================= */
@@ -2544,12 +2938,108 @@ body {
    Default states
    ========================= */
 
-/* Кабинет по умолчанию скрыт при старте сайта */
-#profile-modal{
+/* =========================
+   PROFILE MODAL (Личный кабинет)
+   ========================= */
+.profile-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.32s ease, visibility 0.32s ease, backdrop-filter 0.32s ease;
+}
+
+.profile-modal-overlay.is-open {
+    display: flex !important;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.profile-modal-overlay.closing {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.profile-modal-panel {
+    position: relative;
+    width: 850px;
+    max-width: calc(100vw - 24px);
+    margin: 0;
+    animation: lgcWrapIn 0.55s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+.profile-modal-close {
     display: none !important;
 }
-#user-cabinet{
-    display: none !important;
+
+#user-cabinet.liquid-gold-cabinet {
+    display: grid !important;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 0;
+    padding: 0;
+    max-width: none;
+    border-radius: 28px;
+}
+
+#user-cabinet .lgc-profile {
+    border-radius: 28px 0 0 28px;
+    border-right: 1px solid rgba(255, 215, 0, 0.14);
+    padding: 22px 18px;
+}
+
+#user-cabinet .lgc-center {
+    border-radius: 0 28px 28px 0;
+    padding: 24px 22px;
+}
+
+.lgc-avatar-fallback {
+    width: 100%;
+    height: 100%;
+    border-radius: 23px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 215, 0, 0.08);
+    color: rgba(255, 215, 0, 0.85);
+    font-size: 2rem;
+}
+
+.lgc-avatar-letter {
+    font-family: 'Syncopate', sans-serif;
+    font-weight: 900;
+    font-size: 2.4rem;
+    color: #ffd700;
+    text-shadow: 0 0 18px rgba(255, 215, 0, 0.35);
+}
+
+.lgc-xp-fill {
+    transition: width 0.65s cubic-bezier(.16, 1, .3, 1);
+}
+
+@media (max-width: 768px) {
+    #user-cabinet.liquid-gold-cabinet {
+        grid-template-columns: 1fr;
+    }
+    #user-cabinet .lgc-profile {
+        border-radius: 28px 28px 0 0;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 215, 0, 0.14);
+    }
+    #user-cabinet .lgc-center {
+        border-radius: 0 0 28px 28px;
+    }
 }
 
 /* Исправление категорий от Kimi */
@@ -2564,11 +3054,17 @@ body {
    Стабилизация категорий + независимость модалок.
    Этот блок в КОНЦЕ файла, чтобы перекрывать любые дубляжи выше.
 */
-#profile-modal {
-    display: none !important;
+
+.side-bottom-icons .side-icon-btn {
+    background: none;
+    border: none;
+    color: #555;
+    cursor: pointer;
+    transition: color 0.2s ease;
 }
-#user-cabinet {
-    display: none !important;
+
+.side-bottom-icons .side-icon-btn:hover {
+    color: var(--gold);
 }
 
 .category-card {
