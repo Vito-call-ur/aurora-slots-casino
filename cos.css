@@ -28,7 +28,32 @@ body {
     font-family: 'Space Grotesk', 'Montserrat', sans-serif;
     height: 100vh;
     width: 100vw;
-    overflow: hidden;
+    overflow: hidden; /* desktop default */
+}
+
+/* Better UX on small screens: allow normal page scrolling */
+@media (max-width: 900px) {
+    body {
+        overflow: auto;
+        height: 100%;
+        width: 100%;
+    }
+}
+
+/* Reduced motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Visible focus for keyboard users (without changing the vibe too much) */
+:focus-visible {
+    outline: 2px solid rgba(255, 215, 0, 0.8);
+    outline-offset: 2px;
 }
 
 .app-shell {
@@ -694,23 +719,24 @@ body {
    SETTINGS TOGGLES (Gold neon ON state)
    ========================= */
 
-/* smooth motion + glow for the switch UI */
+/* smooth transitions */
 #settings-sound,
 #settings-ambient,
 #settings-turbo {
     /* inputs are visually hidden in HTML */
 }
 
-/* label default muted (spin.js toggles .is-on) */
+/* OFF label: matte gray + no gold glow */
 #settings-sound-label,
 #settings-ambient-label,
 #settings-turbo-label {
-    color: rgba(255, 255, 255, 0.35) !important;
+    color: rgba(255, 255, 255, 0.45) !important;
     opacity: 0.65;
     font-weight: 900;
     transition: all 0.3s ease;
 }
 
+/* ON label: golden + glow */
 #settings-sound-label.is-on,
 #settings-ambient-label.is-on,
 #settings-turbo-label.is-on {
@@ -720,29 +746,58 @@ body {
     filter: brightness(1.15);
 }
 
-/* Switch background when checked */
+/* Switch capsule OFF */
+.settings-switch-ui {
+    position: relative !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: none !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Switch capsule ON (checked) */
 #settings-sound:checked ~ .settings-switch-ui,
 #settings-ambient:checked ~ .settings-switch-ui,
 #settings-turbo:checked ~ .settings-switch-ui {
     background: linear-gradient(135deg, #ffd700, #b8860b) !important;
-    border: 1px solid rgba(255, 215, 0, 0.55) !important;
     box-shadow: 0 0 10px rgba(255, 215, 0, 0.5) !important;
+    border: 1px solid rgba(255, 215, 0, 0.65) !important;
     transition: all 0.3s ease !important;
 }
 
-/* Knob slide + glow when checked */
+/* Knob centered vertically inside capsule */
+.settings-switch-knob {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Knob OFF position */
+#settings-sound ~ .settings-switch-ui .settings-switch-knob,
+#settings-ambient ~ .settings-switch-ui .settings-switch-knob,
+#settings-turbo ~ .settings-switch-ui .settings-switch-knob {
+    left: 4px !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+
+/* Knob ON position (slides right smoothly) */
 #settings-sound:checked ~ .settings-switch-ui .settings-switch-knob,
 #settings-ambient:checked ~ .settings-switch-ui .settings-switch-knob,
 #settings-turbo:checked ~ .settings-switch-ui .settings-switch-knob {
-    transform: translateX(24px) !important; /* плавное смещение вправо (Y остаётся как было) */
-    box-shadow: 0 0 18px rgba(255, 215, 0, 0.35) !important;
-    transition: all 0.3s ease !important;
+    left: calc(100% - 24px - 4px) !important;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.45) !important;
+    filter: brightness(1.05) !important;
 }
 
-/* Ensure the knob and UI have transitions even before checked (prevents instant jumps) */
-.settings-switch-ui,
-.settings-switch-knob {
-    transition: all 0.3s ease !important;
+/* Safety: enforce OFF capsule when not checked */
+#settings-sound:not(:checked) ~ .settings-switch-ui,
+#settings-ambient:not(:checked) ~ .settings-switch-ui,
+#settings-turbo:not(:checked) ~ .settings-switch-ui {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: none !important;
 }
 
 /* Плавные переходы для карточек категорий */
